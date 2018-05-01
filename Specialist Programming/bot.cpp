@@ -445,10 +445,13 @@ void Bot::ProcessAI()
 	// DRAW FEELERS
 	//MyDrawEngine::GetInstance()->FillCircle(m_feeler.GetCentre(),m_feeler.GetRadius(), MyDrawEngine::WHITE);
 	//MyDrawEngine::GetInstance()->WriteInt(Vector2D(0.0f,0.0f), DynamicObjects::GetInstance()->GetGraph().GetDistance(m_Position, DynamicObjects::GetInstance()->GetGraph().m_NodeVector.at(980).m_position),MyDrawEngine::WHITE);
-	if(m_iOwnBotNumber == 0)
-	DynamicObjects::GetInstance()->GetGraph().DrawNodes();
-	//DynamicObjects::GetInstance()->GetGraph().DrawEdges();
-	//MyDrawEngine::GetInstance()->WriteInt( Vector2D(0, 0), m_currentPath.size(), MyDrawEngine::WHITE);
+	if (m_iOwnBotNumber == 0)
+	{
+		DynamicObjects::GetInstance()->GetGraph().DrawNodes();
+	    DynamicObjects::GetInstance()->GetGraph().DrawEdges();
+		MyDrawEngine::GetInstance()->WriteInt( Vector2D(0, 0), m_currentPath.size(), MyDrawEngine::WHITE);
+
+	}
 
 }
 

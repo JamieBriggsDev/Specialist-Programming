@@ -74,6 +74,7 @@ public:
 	void DrawLists();
 	void DrawPath();
 	void AnalyseMap();
+	static int m_totalNodes;
 	void Partition(Rectangle2D _rect);
 	void FindPaths();
 

@@ -107,6 +107,8 @@ void Graph::AnalyseMap()
 	FindPaths();
 }
 
+int Graph::m_totalNodes = 0;
+
 void Graph::Partition(Rectangle2D _rect)
 {
 	// This partition method works by sticking a node inside a 
@@ -130,11 +132,13 @@ void Graph::Partition(Rectangle2D _rect)
 	//|#############|	  O  	|	  O		|	  O		|
 	//|#############|			|			|			|
 	//--------------------------------------------------
+
 	
 	// Makes sure that once the area of the rectangle
 	//  gets too small, it stops partitioning.
 	if (_rect.GetArea() < 10000)
 	{
+		m_totalNodes += 1;
 		return;
 	}
 	// Otherwise, let the partitioning begin!
