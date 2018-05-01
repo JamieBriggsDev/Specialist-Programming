@@ -47,7 +47,8 @@ protected:
 	Vector2D targetPoint;			// Used only by placeholder AI. Delete this.
 
 	// State 
-	State<Bot>* m_myState;
+	State<class Bot>* m_currentState;
+	State<class Bot>* m_previousState;
 	void ChangeState(State<Bot>* _state);
 
 

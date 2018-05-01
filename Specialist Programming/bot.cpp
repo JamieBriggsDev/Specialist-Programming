@@ -1,5 +1,6 @@
 #include <cmath>
 
+#include "Debug.h"
 #include "bot.h"
 #include "dynamicobjects.h"
 #include "staticmap.h"
@@ -7,6 +8,7 @@
 #include "mydrawengine.h"
 #include "navMesh.h"
 #include "AllStates.h"
+
 			
 
 float Bot::GetDistance(Vector2D _first, Vector2D _second)
@@ -241,12 +243,26 @@ bool Bot::IsAlive()
 
 void Bot::ChangeState(State<Bot>* _state)
 {
-	if (_state)
+	//if (_state)
+	//{
+	//	m_myState->Exit(this);
+	//	m_myState = _state;
+	//	m_myState->Enter(this);
+	//}
+
+	// If there is a current state, exit it
+	if (m_currentState != nullptr)
 	{
-		m_myState->Exit(this);
-		m_myState = _state;
-		m_myState->Enter(this);
+		m_currentState->Exit(this);
+		// First sets the previous state with the current state
+		m_previousState = m_currentState;
+
 	}
+	// Makes the current state the new state
+	m_currentState = _state;
+	// Enters the current state if not nullptr
+	if (_state != nullptr)
+		m_currentState->Enter(this);
 }
 
 Bot::Bot()
@@ -353,8 +369,10 @@ void Bot::StartAI()
 	behaviour* myBehaviour = new behaviour;
 	m_behaviour = myBehaviour;
 	m_behaviour->SetOwner(this);
-	// Lets member variable in behaviour point to this bot so positions can be used
-	//m_behaviour->m_bot = this;
+	
+	// Sets states to nullptr
+	m_currentState = nullptr;
+	m_previousState = nullptr;
 
 
 	Vector2D start = Vector2D(-1400.0f, 0.0f);
@@ -379,25 +397,27 @@ void Bot::ProcessAI()
 	// Update bots behaviour variables at the start
 	if (IsAlive())
 	{
-		if (m_behaviour->GetCurrentState() == nullptr)
-			m_behaviour->SetCurrentState(Capture::GetInstance());
+		if (m_currentState == nullptr)
+			ChangeState(Capture::GetInstance());
 
-		m_behaviour->GetCurrentState()->Update(this);
+		m_currentState->Update(this);
 		//m_behaviour->update(this);
 		//m_Acceleration += m_behaviour->FollowPath();
 
 	}
 	else
-		m_behaviour->SetCurrentState(nullptr);
+		ChangeState(nullptr);
+
+	
+	Debug::GetInstance()->DrawPath(m_behaviour->GetPath(), this->m_Position);
+
+
 
 
 	// Update Feeler (checks for collision) and check for wall collision
 	//m_feeler.PlaceAt(m_Position + 10.0f * m_Velocity.unitVector(), 50.0f);
 	//if (StaticMap::GetInstance()->IsInsideBlock(m_feeler))
 	//m_Acceleration += m_behaviour->AvoidWall(m_feeler);
-
-
-
 
 
 
@@ -425,8 +445,8 @@ void Bot::ProcessAI()
 	// DRAW FEELERS
 	//MyDrawEngine::GetInstance()->FillCircle(m_feeler.GetCentre(),m_feeler.GetRadius(), MyDrawEngine::WHITE);
 	//MyDrawEngine::GetInstance()->WriteInt(Vector2D(0.0f,0.0f), DynamicObjects::GetInstance()->GetGraph().GetDistance(m_Position, DynamicObjects::GetInstance()->GetGraph().m_NodeVector.at(980).m_position),MyDrawEngine::WHITE);
-	//if(m_iOwnBotNumber == 0)
-	//DynamicObjects::GetInstance()->GetGraph().DrawNodes();
+	if(m_iOwnBotNumber == 0)
+	DynamicObjects::GetInstance()->GetGraph().DrawNodes();
 	//DynamicObjects::GetInstance()->GetGraph().DrawEdges();
 	//MyDrawEngine::GetInstance()->WriteInt( Vector2D(0, 0), m_currentPath.size(), MyDrawEngine::WHITE);
 

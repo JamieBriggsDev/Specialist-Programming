@@ -151,6 +151,7 @@
     <ClInclude Include="behaviour.h" />
     <ClInclude Include="bot.h" />
     <ClInclude Include="camera.h" />
+    <ClInclude Include="Debug.h" />
     <ClInclude Include="dynamicObjects.h" />
     <ClInclude Include="ErrorLogger.h" />
     <ClInclude Include="errortype.h" />
@@ -175,6 +176,7 @@
     <ClCompile Include="behaviour.cpp" />
     <ClCompile Include="bot.cpp" />
     <ClCompile Include="camera.cpp" />
+    <ClCompile Include="Debug.cpp" />
     <ClCompile Include="dynamicobjects.cpp" />
     <ClCompile Include="ErrorLogger.cpp" />
     <ClCompile Include="game.cpp" />

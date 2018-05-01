@@ -1,6 +1,6 @@
 #include "behaviour.h"
 
-behaviour::behaviour() : m_owner(nullptr), m_botToShoot(nullptr), m_currentState(nullptr), m_previousState(nullptr)
+behaviour::behaviour() : m_owner(nullptr), m_botToShoot(nullptr)//, m_currentState(nullptr), m_previousState(nullptr)
 {
 	SetBehaviours(false, false, false, false, false, true, true);
 }
@@ -20,22 +20,10 @@ void behaviour::Update()
 {
 }
 
-void behaviour::SetCurrentState(State<Bot>* _newState)
-{
-	// If there is a current state, exit it
-	if (m_currentState)
-	{
-		m_currentState->Exit(m_owner);
-		// First sets the previous state with the current state
-		m_previousState = m_currentState;
-
-	}
-	// Makes the current state the new state
-	m_currentState = _newState;
-	// Enters the current state if not nullptr
-	if(_newState != nullptr)
-		m_currentState->Enter(m_owner);
-}
+//void behaviour::SetCurrentState(State<Bot>* _newState)
+//{
+//
+//}
 
 //void behaviour::MoveTo(Vector2D _target)
 //{
@@ -200,22 +188,28 @@ Vector2D behaviour::AvoidWall(const Vector2D& _currentPosition, const Vector2D& 
 Vector2D behaviour::AccumilateBehaviours(const Vector2D& _currentPosition, const Vector2D& _currentVelocity,
 	const Vector2D& _targetPosition, const Vector2D& _targetVelocity)
 {
+	Vector2D t_tempAcceleration[7];
 	Vector2D t_acceleration;
 	// ADD ALL SEVEN BEHAVIOUR STATES TO T_ACCELERATION AND RETURN
-	if(m_isSeeking)
-		t_acceleration += Seek(_currentPosition, _currentVelocity, _targetPosition);
-	if (m_isArriving)
-		t_acceleration += Arrive(_currentPosition, _currentVelocity, _targetPosition);
-	if (m_isPursuiting)
-		t_acceleration += Pursue(_currentPosition, _currentVelocity, _targetPosition, _targetVelocity);
-	if (m_isEvading)
-		t_acceleration += Evade(_currentPosition, _currentVelocity, _targetPosition, _targetVelocity);
-	if (m_isFleeing)
-		t_acceleration += Flee(_currentPosition, _currentVelocity, _targetPosition);
-	if (m_isAvoidingWalls)
-		t_acceleration += AvoidWall(_currentPosition, _currentVelocity);
 	if (m_isSeeking)
-		t_acceleration += FollowPath(_currentPosition, _currentVelocity);
+		t_tempAcceleration[0] = Seek(_currentPosition, _currentVelocity, _targetPosition);
+	if (m_isArriving)
+		t_tempAcceleration[1] = Arrive(_currentPosition, _currentVelocity, _targetPosition);
+	if (m_isPursuiting)
+		t_tempAcceleration[2] = Pursue(_currentPosition, _currentVelocity, _targetPosition, _targetVelocity);
+	if (m_isEvading)
+		t_tempAcceleration[3] = Evade(_currentPosition, _currentVelocity, _targetPosition, _targetVelocity);
+	if (m_isFleeing)
+		t_tempAcceleration[4] = Flee(_currentPosition, _currentVelocity, _targetPosition);
+	if (m_isAvoidingWalls)
+		t_tempAcceleration[5] = AvoidWall(_currentPosition, _currentVelocity);
+	if (m_isFollowingPath)
+		t_tempAcceleration[6] = FollowPath(_currentPosition, _currentVelocity);
+
+	for (int i = 0; i < 7; i++)
+	{
+		t_acceleration += t_tempAcceleration[i];
+	}
 
 
 	return t_acceleration;
@@ -367,7 +361,7 @@ Vector2D behaviour::FollowPath(const Vector2D& _currentPosition, const Vector2D&
 			if (t_arriveCircle.Intersects((Point2D)t_nextNodeInPath))
 			{
 				m_path.pop();
-				m_path.top();
+				//m_path.top();
 			}
 		}
 	}

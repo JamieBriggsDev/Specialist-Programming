@@ -87,6 +87,9 @@
     <ClInclude Include="AllStates.h">
       <Filter>States</Filter>
     </ClInclude>
+    <ClInclude Include="Debug.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="bot.cpp">
@@ -148,6 +151,9 @@
     </ClCompile>
     <ClCompile Include="sCapture.cpp">
       <Filter>States</Filter>
+    </ClCompile>
+    <ClCompile Include="Debug.cpp">
+      <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

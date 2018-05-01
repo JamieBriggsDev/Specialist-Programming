@@ -20,8 +20,6 @@ private:
 	std::stack<Vector2D> m_path;
 	Vector2D m_currentPathTarget;
 	Vector2D m_startTarget;
-	State<class Bot>* m_currentState;
-	State<class Bot>* m_previousState;
 
 	// Behaviour Switches
 	bool m_isSeeking = false;
@@ -58,9 +56,9 @@ public:
 	// Get Owner Bot
 	class Bot* GetOwnerBot() { return m_owner; }
 	// Get Current State
-	State<Bot>* GetCurrentState() { return m_currentState; }
+	//State<Bot>* GetCurrentState() { return m_currentState; }
 	// Set new state
-	void SetCurrentState(State<Bot>* _newState);
+	//void SetCurrentState(State<Bot>* _newState);
 	// Set domination target
 	void SetDominationID(int _id) { m_dominationTarget = _id; }
 	// Get domination target

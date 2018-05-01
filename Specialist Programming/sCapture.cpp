@@ -40,8 +40,8 @@ void Capture::SetTarget(Bot * pBot)
 	// Gives the bot a target
 	pBot->m_behaviour->SetDominationID(pBot->GetBotID() % 3);
 
-	pBot->m_behaviour->SetPath(pBot->m_Position, DynamicObjects::GetInstance()->
-		GetDominationPoint(pBot->m_behaviour->GetDominationID()).m_Location);
+	pBot->m_behaviour->SetPath(DynamicObjects::GetInstance()->
+		GetDominationPoint(pBot->m_behaviour->GetDominationID()).m_Location, pBot->GetLocation());
 }
 
 void Capture::CheckDistance(Bot* pBot)

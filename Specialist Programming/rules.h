@@ -14,6 +14,6 @@ const float ACCURATERANGE = 200.0f;			// Range at which you can expect 100% accu
 const float AIMRATE = 0.3f;					// Rate at which accuracy increases
 const int MAXAMMO = 8;
 const float NAVMESHLENGTH = 1300.0f;
-const float NAVMESHHEIGHT = 1500.0f;
+const float NAVMESHHEIGHT = 1300.0f;
 const int FRIENDTEAM = 0;
 const int ENEMYTEAM = 1;

@@ -176,21 +176,38 @@ void Graph::Partition(Rectangle2D _rect)
 
 void Graph::FindPaths()
 {
-	int l_NodeVectorSize = this->m_NodeVector.size();
-	for (int i = 0; i < l_NodeVectorSize; i++)
+	StaticMap* pStaticMap = StaticMap::GetInstance();
+
+	//int l_NodeVectorSize = this->m_NodeVector.size();
+	//for (int i = 0; i < l_NodeVectorSize; i++)
+	//{
+	//	// Start from after the node we're checking
+	//	for (int j = i + 1; j < l_NodeVectorSize; j++)
+	//	{
+	//		// Makes sure not to compare the node with itself
+	//		if ( StaticMap::GetInstance()->
+	//			IsLineOfSight(m_NodeVector.at(i).m_position, m_NodeVector.at(j).m_position)
+	//			/*&& GetDistance(&m_NodeVector.at(i), &m_NodeVector.at(j)) < 500.0f*/)
+	//		{
+	//			float l_distance = GetDistance(&this->m_NodeVector.at(i), &this->m_NodeVector.at(j));
+	//			AddEdge(this->m_NodeVector.at(i), this->m_NodeVector.at(j), l_distance);
+	//		}
+	//		
+	//	}
+	//}
+	for (Node& i : m_NodeVector)
 	{
-		// Start from after the node we're checking
-		for (int j = i + 1; j < l_NodeVectorSize; j++)
+		for (Node& j : m_NodeVector)
 		{
-			// Makes sure not to compare the node with itself
-			if ( StaticMap::GetInstance()->
-				IsLineOfSight(m_NodeVector.at(i).m_position, m_NodeVector.at(j).m_position)
-				/*&& GetDistance(&m_NodeVector.at(i), &m_NodeVector.at(j)) < 500.0f*/)
-			{
-				float l_distance = GetDistance(&this->m_NodeVector.at(i), &this->m_NodeVector.at(j));
-				AddEdge(this->m_NodeVector.at(i), this->m_NodeVector.at(j), l_distance);
+			if (pStaticMap->IsLineOfSight(i.m_position, j.m_position))
+			{ // If there is a line of sight, create and store the edge
+				float l_distance = (i.m_position - j.m_position).magnitude();
+				AddEdge(i, j, l_distance);
+				//Edge anEdge;
+				//anEdge.edgeTo = j.nodeID;
+				//anEdge.cost = (i.m_position - j.m_position).magnitude();
+				//i.edges.push_back(anEdge);
 			}
-			
 		}
 	}
 }
