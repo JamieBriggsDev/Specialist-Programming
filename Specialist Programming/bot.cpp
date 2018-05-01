@@ -6,7 +6,7 @@
 #include "renderer.h"
 #include "mydrawengine.h"
 #include "navMesh.h"
-
+#include "AllStates.h"
 			
 
 float Bot::GetDistance(Vector2D _first, Vector2D _second)
@@ -352,6 +352,7 @@ void Bot::StartAI()
 	// Creates a new behaviour and gives it to the bot
 	behaviour* myBehaviour = new behaviour;
 	m_behaviour = myBehaviour;
+	m_behaviour->SetOwner(this);
 	// Lets member variable in behaviour point to this bot so positions can be used
 	//m_behaviour->m_bot = this;
 
@@ -378,16 +379,22 @@ void Bot::ProcessAI()
 	// Update bots behaviour variables at the start
 	if (IsAlive())
 	{
+		if (m_behaviour->GetCurrentState() == nullptr)
+			m_behaviour->SetCurrentState(Capture::GetInstance());
+
+		m_behaviour->GetCurrentState()->Update(this);
 		//m_behaviour->update(this);
 		//m_Acceleration += m_behaviour->FollowPath();
 
 	}
+	else
+		m_behaviour->SetCurrentState(nullptr);
 
 
 	// Update Feeler (checks for collision) and check for wall collision
-	m_feeler.PlaceAt(m_Position + 10.0f * m_Velocity.unitVector(), 50.0f);
+	//m_feeler.PlaceAt(m_Position + 10.0f * m_Velocity.unitVector(), 50.0f);
 	//if (StaticMap::GetInstance()->IsInsideBlock(m_feeler))
-	m_Acceleration += m_behaviour->AvoidWall(m_feeler);
+	//m_Acceleration += m_behaviour->AvoidWall(m_feeler);
 
 
 

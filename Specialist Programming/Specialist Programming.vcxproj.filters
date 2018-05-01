@@ -81,8 +81,11 @@
     <ClInclude Include="State.h">
       <Filter>States</Filter>
     </ClInclude>
-    <ClInclude Include="botController.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="sCapture.h">
+      <Filter>States</Filter>
+    </ClInclude>
+    <ClInclude Include="AllStates.h">
+      <Filter>States</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -141,10 +144,10 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="State.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>States</Filter>
     </ClCompile>
-    <ClCompile Include="botController.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="sCapture.cpp">
+      <Filter>States</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

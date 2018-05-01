@@ -13,7 +13,9 @@ enum States { HUNT , TOTAL_STATES};
 
 class Bot
 {
-	friend class botController;
+	friend class State<Bot>;
+	friend class Capture;
+	friend class behaviour;
 protected:
 	Vector2D m_Position;			// Current world coordinates
 	Vector2D m_Velocity;			// Current velocity
@@ -158,4 +160,14 @@ public:
 
 	// Stops the bot from aiming, so it can move again
 	void StopAiming();
+
+	// Gets the bot ID
+	int GetBotID() { return m_iOwnBotNumber; }
+	// Get Team Number
+	int GetTeamID() { return m_iOwnTeamNumber;  }
+
+	// Get Acceleration
+	Vector2D GetAcceleration() { return m_Acceleration; }
+	// Set Acceleration
+	void SetAcceleration(Vector2D _acceleration) { m_Acceleration = _acceleration; }
 };

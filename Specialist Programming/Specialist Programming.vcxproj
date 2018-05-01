@@ -147,9 +147,9 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="AllStates.h" />
     <ClInclude Include="behaviour.h" />
     <ClInclude Include="bot.h" />
-    <ClInclude Include="botController.h" />
     <ClInclude Include="camera.h" />
     <ClInclude Include="dynamicObjects.h" />
     <ClInclude Include="ErrorLogger.h" />
@@ -164,6 +164,7 @@
     <ClInclude Include="navMesh.h" />
     <ClInclude Include="Renderer.h" />
     <ClInclude Include="rules.h" />
+    <ClInclude Include="sCapture.h" />
     <ClInclude Include="Shapes.h" />
     <ClInclude Include="SoundPlayer.h" />
     <ClInclude Include="State.h" />
@@ -173,7 +174,6 @@
   <ItemGroup>
     <ClCompile Include="behaviour.cpp" />
     <ClCompile Include="bot.cpp" />
-    <ClCompile Include="botController.cpp" />
     <ClCompile Include="camera.cpp" />
     <ClCompile Include="dynamicobjects.cpp" />
     <ClCompile Include="ErrorLogger.cpp" />
@@ -186,6 +186,7 @@
     <ClCompile Include="mysoundengine.cpp" />
     <ClCompile Include="navMesh.cpp" />
     <ClCompile Include="renderer.cpp" />
+    <ClCompile Include="sCapture.cpp" />
     <ClCompile Include="Shapes.cpp" />
     <ClCompile Include="State.cpp" />
     <ClCompile Include="staticmap.cpp" />
