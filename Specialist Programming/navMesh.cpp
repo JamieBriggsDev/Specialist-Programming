@@ -4,6 +4,8 @@
 #include "mydrawengine.h"
 #include "rules.h"
 
+#define add(n) push_back(n)
+
 Graph* Graph::m_instance = nullptr;
 
 void Graph::AddNode(Vector2D _location)
@@ -13,29 +15,30 @@ void Graph::AddNode(Vector2D _location)
 	m_NodeVector.push_back(newNode);
 }
 
-void Graph::AddEdge(Node _from, Node _to, float _cost)
+void Graph::AddEdge(Node *_from, Node *_to, float _cost)
 {
 	Edge newEdge;
-	newEdge.m_fromNode = &_from;
-	newEdge.m_toNode = &_to;
+	newEdge.m_fromNode = _from;
+	newEdge.m_toNode = _to;
 	newEdge.m_cost = _cost;
+
 
 	// For the way back, passed into the _to->edgelist
 	Edge invertedEdge;
-	invertedEdge.m_fromNode = &_to;
-	invertedEdge.m_toNode = &_from;
+	invertedEdge.m_fromNode = _to;
+	invertedEdge.m_toNode = _from;
 	invertedEdge.m_cost = _cost;
 
 
 	// Stored in edge vector so drawing lines is easier
 	m_EdgeVector.push_back(newEdge);
 
-	_from.m_edgeList.push_back(newEdge);
-	_to.m_edgeList.push_back(invertedEdge);
+	_from->m_edgeList.push_back(newEdge);
+	_to->m_edgeList.push_back(invertedEdge);
 
 	// Add Nodes to Node lists in Node
-	_from.m_nodeList.push_back(_to);
-	_to.m_nodeList.push_back(_from);
+	//_from->m_nodeList.push_back(_to);
+	//_to->m_nodeList.push_back(_from);
 }
 
 float Graph::GetDistance(Node* _from, Node* _to)
@@ -81,21 +84,15 @@ Vector2D Graph::GetClosestNodePosition(Vector2D _position)
 
 void Graph::DrawNodes()
 {
-	for (int i = 0; i < (int)m_NodeVector.size(); i++)
-	{
-		MyDrawEngine::GetInstance()->FillCircle(m_NodeVector.at(i).m_position, 5.0f, MyDrawEngine::GREEN);
-	}
-	MyDrawEngine::GetInstance()->WriteInt(Vector2D(0.0f, 0.0f), m_NodeVector.size(), MyDrawEngine::RED);
+	// Draw a list of nodes
+	MyDrawEngine::GetInstance()->DrawPointList(m_drawNode.data(), MyDrawEngine::WHITE, m_NodeVector.size());
 }
 
 void Graph::DrawEdges()
-{
-	for (int i = 0; i < (int)m_EdgeVector.size(); i++)
-	{
-		MyDrawEngine::GetInstance()->DrawLine(m_EdgeVector.at(i).m_fromNode->m_position,
-			m_EdgeVector.at(i).m_toNode->m_position,MyDrawEngine::DARKGREEN);
-	}
-		MyDrawEngine::GetInstance()->WriteInt(Vector2D(0.0f, 0.0f), m_EdgeVector.size(), MyDrawEngine::RED);
+{ 
+	// Draws a list of edges
+	MyDrawEngine::GetInstance()->DrawLineList(m_drawEdgeStart.data(), m_drawEdgeFinish.data(), MyDrawEngine::BLACK, m_EdgeVector.size());
+		//MyDrawEngine::GetInstance()->WriteInt(Vector2D(0.0f, 0.0f), m_EdgeVector.size(), MyDrawEngine::RED);
 }
 
 void Graph::AnalyseMap()
@@ -136,7 +133,7 @@ void Graph::Partition(Rectangle2D _rect)
 	
 	// Makes sure that once the area of the rectangle
 	//  gets too small, it stops partitioning.
-	if (_rect.GetArea() < 10000)
+	if (_rect.GetArea() < 1247)
 	{
 		m_totalNodes += 1;
 		return;
@@ -182,40 +179,57 @@ void Graph::FindPaths()
 {
 	StaticMap* pStaticMap = StaticMap::GetInstance();
 
-	//int l_NodeVectorSize = this->m_NodeVector.size();
-	//for (int i = 0; i < l_NodeVectorSize; i++)
-	//{
-	//	// Start from after the node we're checking
-	//	for (int j = i + 1; j < l_NodeVectorSize; j++)
-	//	{
-	//		// Makes sure not to compare the node with itself
-	//		if ( StaticMap::GetInstance()->
-	//			IsLineOfSight(m_NodeVector.at(i).m_position, m_NodeVector.at(j).m_position)
-	//			/*&& GetDistance(&m_NodeVector.at(i), &m_NodeVector.at(j)) < 500.0f*/)
-	//		{
-	//			float l_distance = GetDistance(&this->m_NodeVector.at(i), &this->m_NodeVector.at(j));
-	//			AddEdge(this->m_NodeVector.at(i), this->m_NodeVector.at(j), l_distance);
-	//		}
-	//		
-	//	}
-	//}
-	for (Node& i : m_NodeVector)
+	int l_NodeVectorSize = m_NodeVector.size();
+	for (int i = 0; i < l_NodeVectorSize; i++)
 	{
-		for (Node& j : m_NodeVector)
+		// Start from after the node we're checking
+		for (int j = i + 1; j < l_NodeVectorSize; j++)
 		{
-			if (pStaticMap->IsLineOfSight(i.m_position, j.m_position))
-			{ // If there is a line of sight, create and store the edge
-				float l_distance = (i.m_position - j.m_position).magnitude();
-				AddEdge(i, j, l_distance);
-				//Edge anEdge;
-				//anEdge.edgeTo = j.nodeID;
-				//anEdge.cost = (i.m_position - j.m_position).magnitude();
-				//i.edges.push_back(anEdge);
+			// Makes sure not to compare the node with itself
+			if ( StaticMap::GetInstance()->
+				IsLineOfSight(m_NodeVector.at(i).m_position, m_NodeVector.at(j).m_position)
+				&& GetDistance(&m_NodeVector.at(i), &m_NodeVector.at(j)) < 350.0f
+				&& GetDistance(&m_NodeVector.at(i), &m_NodeVector.at(j)) > 50.0f)
+			{
+				float l_distance = (m_NodeVector.at(i).m_position - m_NodeVector.at(j).m_position).magnitude();
+				AddEdge(&m_NodeVector.at(i), &m_NodeVector.at(j), l_distance);
 			}
+			
 		}
 	}
-}
+	//for (Node i : m_NodeVector)
+	//{
+	//	for (Node j : m_NodeVector)
+	//	{
+	//		if (pStaticMap->IsLineOfSight(i.m_position, j.m_position))
+	//		{ // If there is a line of sight, create and store the edge
+	//			float l_distance = (i.m_position - j.m_position).magnitude();
+	//			AddEdge(&i, &j, l_distance);
 
+	//			//Edge anEdge;
+	//			//anEdge.edgeTo = j.nodeID;
+	//			//anEdge.cost = (i.m_position - j.m_position).magnitude();
+	//			//i.edges.push_back(anEdge);
+	//		}
+	//	}
+	//}
+	m_drawNode.clear();
+	m_drawEdgeStart.clear();
+	m_drawEdgeFinish.clear();
+
+	for (Edge e : m_EdgeVector)
+	{
+		m_drawEdgeStart.push_back(e.m_fromNode->m_position);
+		m_drawEdgeFinish.push_back(e.m_toNode->m_position);
+	}
+
+
+	for (Node n : m_NodeVector)
+	{
+		m_drawNode.push_back(n.m_position);
+	}
+
+}
 std::stack<Vector2D> Graph::PathFind(Vector2D _from, Vector2D _to)
 {
 	// #0	-	Initialise starting variables
@@ -223,6 +237,9 @@ std::stack<Vector2D> Graph::PathFind(Vector2D _from, Vector2D _to)
 	std::vector<Node*> l_neighbors;
 	// Temp g score variable
 	float l_tentativeGScore;
+
+	while (!m_path.empty())
+		m_path.pop();
 
 	// Makes sure sets are all empty
 	m_closedSet.clear();
@@ -236,7 +253,7 @@ std::stack<Vector2D> Graph::PathFind(Vector2D _from, Vector2D _to)
 	l_start->m_parent = nullptr;
 	l_start->g = 0.0f;
 	l_start->f = findHeuristic(l_start, l_goal);
-	m_openSet.push_back(l_start);
+	m_openSet.add(l_start);
 
 	// #2 Start loop
 	while (!m_openSet.empty())
@@ -260,35 +277,15 @@ std::stack<Vector2D> Graph::PathFind(Vector2D _from, Vector2D _to)
 		}
 
 		// #4	-	Remove current node from open set and add to closed set
-		m_closedSet.push_back(m_currentPtr);
+		m_closedSet.add(m_currentPtr);
+
+		///////////
 		RemoveElementFromVector(m_openSet, m_currentPtr);
 
-		// #5	-	 Go through each neighbour in l_currentNode. If Node is in
-		//  the closed list, then ignore it.
-		// If node is not in the open list, add it and find out its score
-		// If the node is already in the open list, check the G score if its lower
-		// then the current generated path to get there. IF it is, update its scores and
-		// update its parent as well
-		//for (std::vector<Node*>::iterator iter = l_current->m_nodeList.begin(); 
-		//	iter != l_current->m_nodeList.end(); ++iter)
-
-		// # 5	-	Find all neighbors to the current node
-		l_neighbors.clear();
-		for (int i = 0; i < (int)m_NodeVector.size(); i++)
+		// #5 - Get nodes neighbours
+		for (int i = 0; i < m_currentPtr->m_edgeList.size(); i++)
 		{
-			if (m_NodeVector.at(i).m_position == m_currentPtr->m_position)
-			{
-				continue;
-			}
-			if (ElementInVector(m_closedSet, &m_NodeVector.at(i)))
-			{
-				continue;
-			}
-			if (StaticMap::GetInstance()->IsLineOfSight(m_currentPtr->m_position,
-				m_NodeVector.at(i).m_position))
-			{
-				l_neighbors.push_back(&m_NodeVector.at(i));
-			}
+			l_neighbors.push_back(m_currentPtr->m_edgeList[i].m_toNode);
 		}
 
 		// #6	-	Go through all neighbours. 
@@ -299,7 +296,11 @@ std::stack<Vector2D> Graph::PathFind(Vector2D _from, Vector2D _to)
 		for (int i = 0; i < (int)l_neighbors.size(); i++)
 		{
 			// if node is within the closed set, skip the node
-			if (!ElementInVector(m_closedSet, l_neighbors.at(i)))
+			if (ElementInVector(m_closedSet, l_neighbors.at(i)))
+			{
+				continue;
+			}
+			else
 			{
 				//// The distance from start to a neighbor
 				l_tentativeGScore = m_currentPtr->g +
@@ -322,13 +323,14 @@ std::stack<Vector2D> Graph::PathFind(Vector2D _from, Vector2D _to)
 				//}
 
 				// Isnt in open set
-				if (!ElementInVector(m_openSet, l_neighbors.at(i)))
+				if (!ElementInVector(m_openSet, l_neighbors[i]) ||
+					l_tentativeGScore < l_neighbors[i]->g)
 				{
+					l_neighbors.at(i)->m_parent = m_currentPtr;
 					l_neighbors.at(i)->g = l_tentativeGScore;
 					l_neighbors.at(i)->f = l_neighbors.at(i)->g +
 						findHeuristic(l_neighbors.at(i), l_goal);
-					l_neighbors.at(i)->m_parent = m_currentPtr;
-					m_openSet.push_back(l_neighbors.at(i));
+					m_openSet.add(l_neighbors.at(i));
 				}
 				// Is in open set
 				else
@@ -342,7 +344,7 @@ std::stack<Vector2D> Graph::PathFind(Vector2D _from, Vector2D _to)
 						l_neighbors.at(i)->m_parent = m_currentPtr;
 					}
 				}
-				
+
 			}// if not in closed set
 		}// for loop
 	}// while loop
@@ -354,10 +356,156 @@ std::stack<Vector2D> Graph::PathFind(Vector2D _from, Vector2D _to)
 	}
 	else
 	{
-		m_path.push(Vector2D(0.0f, 0.0f));
+		//m_path.push(Vector2D(0.0f, 0.0f));
 		return m_path;
 	}
 }
+
+//std::stack<Vector2D> Graph::PathFind(Vector2D _from, Vector2D _to)
+//{
+//	// #0	-	Initialise starting variables
+//	// Temp variable for nodes neighbours
+//	std::vector<Node*> l_neighbors;
+//	// Temp g score variable
+//	float l_tentativeGScore;
+//
+//	// Makes sure sets are all empty
+//	m_closedSet.clear();
+//	m_openSet.clear();
+//
+//	// Gets start and finish nodes
+//	Node* l_start = GetClosestNode(_from);
+//	Node* l_goal = GetClosestNode(_to);
+//
+//	// #1	-	Put start node into the open list with variables initialised
+//	l_start->m_parent = nullptr;
+//	l_start->g = 0.0f;
+//	l_start->f = findHeuristic(l_start, l_goal);
+//	m_openSet.push_back(l_start);
+//
+//	// #2 Start loop
+//	while (!m_openSet.empty())
+//	{
+//		// #3	-	Find node with smalled f value in open list;
+//		m_currentPtr = FindLowestFScoreNode(m_openSet);
+//
+//		// #FINSIH	-	 This is the finish point which will
+//		// recreate the path
+//		if (m_currentPtr->m_position == l_goal->m_position)
+//		{
+//			while (m_currentPtr)
+//			{
+//				m_path.push(m_currentPtr->m_position);
+//				if (m_currentPtr->m_parent != nullptr)
+//					m_currentPtr = m_currentPtr->m_parent;
+//				else return m_path;
+//			}
+//
+//			break;
+//		}
+//
+//		// #4	-	Remove current node from open set and add to closed set
+//		m_closedSet.push_back(m_currentPtr);
+//
+//		///////////
+//		RemoveElementFromVector(m_openSet, m_currentPtr);
+//
+//		// #5	-	 Go through each neighbour in l_currentNode. If Node is in
+//		//  the closed list, then ignore it.
+//		// If node is not in the open list, add it and find out its score
+//		// If the node is already in the open list, check the G score if its lower
+//		// then the current generated path to get there. IF it is, update its scores and
+//		// update its parent as well
+//		//for (std::vector<Node*>::iterator iter = l_current->m_nodeList.begin(); 
+//		//	iter != l_current->m_nodeList.end(); ++iter)
+//
+//		// # 5	-	Find all neighbors to the current node
+//		l_neighbors.clear();
+//		for (int i = 0; i < (int)m_NodeVector.size(); i++)
+//		{
+//			if (m_NodeVector.at(i).m_position == m_currentPtr->m_position)
+//			{
+//				continue;
+//			}
+//			if (ElementInVector(m_closedSet, &m_NodeVector.at(i)))
+//			{
+//				continue;
+//			}
+//			if (StaticMap::GetInstance()->IsLineOfSight(m_currentPtr->m_position,
+//				m_NodeVector.at(i).m_position))
+//			{
+//				l_neighbors.push_back(&m_NodeVector.at(i));
+//			}
+//		}
+//
+//		// #6	-	Go through all neighbours. 
+//		//			- If its in the closed set, ignore it
+//		//			- If the node isn't in the open set, add it with variables
+//		//			- if its in the open set, check to see if it f value is bigger then this path,
+//		//				and if it is, change it
+//		for (int i = 0; i < (int)l_neighbors.size(); i++)
+//		{
+//			// if node is within the closed set, skip the node
+//			if (!ElementInVector(m_closedSet, l_neighbors.at(i)))
+//			{
+//				//// The distance from start to a neighbor
+//				l_tentativeGScore = m_currentPtr->g +
+//					GetDistance(m_currentPtr, l_neighbors.at(i));
+//
+//				// If the node is not in the open set or the distance traveled is shorted then
+//				//  its set G value
+//				//if (!ElementInVector(l_openSet, l_neighbors.at(i)) ||
+//				//	l_tentativeGScore < l_neighbors.at(i).g)
+//				//{
+//				//	l_neighbors.at(i).g = l_tentativeGScore;
+//				//	l_neighbors.at(i).f = l_neighbors.at(i).g +
+//				//		findHeuristic(l_neighbors.at(i), l_goal);
+//				//	l_neighbors.at(i).m_parent = m_currentPtr;
+//				//	// If its not in the open list, add it
+//				//	if (!ElementInVector(l_openSet, l_neighbors.at(i)))
+//				//	{
+//				//		l_openSet.push_back(l_neighbors.at(i));
+//				//	}
+//				//}
+//
+//				// Isnt in open set
+//				if (!ElementInVector(m_openSet, l_neighbors[i]) ||
+//						l_tentativeGScore < l_neighbors[i]->g)
+//				{
+//					l_neighbors.at(i)->g = l_tentativeGScore;
+//					l_neighbors.at(i)->f = l_neighbors.at(i)->g +
+//						findHeuristic(l_neighbors.at(i), l_goal);
+//					l_neighbors.at(i)->m_parent = m_currentPtr;
+//					m_openSet.push_back(l_neighbors.at(i));
+//				}
+//				// Is in open set
+//				else
+//				{
+//					if (l_tentativeGScore + findHeuristic(l_neighbors.at(i), l_goal) <
+//						l_neighbors.at(i)->f)
+//					{
+//						l_neighbors.at(i)->g = l_tentativeGScore;
+//						l_neighbors.at(i)->f = l_neighbors.at(i)->g +
+//							findHeuristic(l_neighbors.at(i), l_goal);
+//						l_neighbors.at(i)->m_parent = m_currentPtr;
+//					}
+//				}
+//				
+//			}// if not in closed set
+//		}// for loop
+//	}// while loop
+//
+//	 // if fails, return l_path with one position = 0.0f, 0.0f
+//	if (!m_path.empty())
+//	{
+//		return m_path;
+//	}
+//	else
+//	{
+//		//m_path.push(Vector2D(0.0f, 0.0f));
+//		return m_path;
+//	}
+//}
 
 // Manhatten distance
 float Graph::findHeuristic(Node* _start, Node* _finish)
@@ -372,16 +520,17 @@ float Graph::findHeuristic(Node* _start, Node* _finish)
 	//|				
 	//+--------------Y
 	///////////////////
-	float dx = _start->m_position.XValue - _finish->m_position.XValue;
-	if (dx < 0)
-		dx = dx * -1;
+	//float dx = _start->m_position.XValue - _finish->m_position.XValue;
+	//if (dx < 0)
+	//	dx = dx * -1;
 
-	float dy = _start->m_position.YValue - _finish->m_position.YValue;
-	if (dy < 0)
-		dy = dy * -1;
+	//float dy = _start->m_position.YValue - _finish->m_position.YValue;
+	//if (dy < 0)
+	//	dy = dy * -1;
 
 
-	return (dx + dy);
+	//return (dx + dy);
+	return (_start->m_position - _finish->m_position).magnitude();
 }
 
 void Graph::DrawLists()
@@ -393,21 +542,13 @@ void Graph::DrawLists()
 	}
 
 	// Closed Set
-	for (int i = 0; i < (int)m_openSet.size(); i++)
+	for (int i = 0; i < (int)m_closedSet.size(); i++)
 	{
-		MyDrawEngine::GetInstance()->FillCircle(m_openSet.at(i)->m_position, 2.5f, MyDrawEngine::RED);
+		MyDrawEngine::GetInstance()->FillCircle(m_closedSet.at(i)->m_position, 1.5f, MyDrawEngine::RED);
 	}
 }
 
-void Graph::DrawPath()
-{
-	std::stack<Vector2D> l_temp = m_path;
-	while (!l_temp.empty())
-	{
-		MyDrawEngine::GetInstance()->FillCircle(l_temp.top(), 4.0f, MyDrawEngine::GREEN);
-		l_temp.pop();
-	}
-}
+
 
 Node* Graph::FindLowestFScoreNode(std::vector<Node*> _set)
 {

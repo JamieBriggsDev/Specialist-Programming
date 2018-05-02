@@ -162,8 +162,8 @@ Vector2D behaviour::AvoidWall(const Vector2D& _currentPosition, const Vector2D& 
 {
 	Vector2D t_projection = _currentVelocity.unitVector() * 50;
 	// Make collision circles, small for complete collision, big for avoiding collision
-	Circle2D t_smallCollisionCircle(_currentPosition + t_projection, 30.0f);
-	Circle2D t_bigCollisionCircle(_currentPosition + t_projection, 50.0f);
+	Circle2D t_smallCollisionCircle(_currentPosition + t_projection, 3.0f);
+	Circle2D t_bigCollisionCircle(_currentPosition + t_projection, 15.0f);
 
 	// Create a Vector2D for velocity and init to 0
 	Vector2D t_desiredVelocity;
@@ -310,28 +310,30 @@ Vector2D behaviour::AccumilateBehaviours(const Vector2D& _currentPosition, const
 //	return l_output;
 //}
 
-void behaviour::SetPath(std::stack<Vector2D> _path)
-{
-	//for (int i = 1; i < _path.size(); i++)
-	//{
-	//	m_path.push(_path.at(_path.size() - i));
-	//}
-
-	//// Sets current target as the first node
-	////  then removes current target from list so the
-	////  next node can be seen for smoothing
-	//m_currentPathTarget = m_path.top();
-	//m_path.pop();
-	m_path = _path;
-}
+//void behaviour::SetPath(std::stack<Vector2D> _path)
+//{
+//	//for (int i = 1; i < _path.size(); i++)
+//	//{
+//	//	m_path.push(_path.at(_path.size() - i));
+//	//}
+//
+//	//// Sets current target as the first node
+//	////  then removes current target from list so the
+//	////  next node can be seen for smoothing
+//	//m_currentPathTarget = m_path.top();
+//	//m_path.pop();
+//	m_path = _path;
+//}
 
 void behaviour::SetPath(Vector2D _goal, Vector2D _currentLocation)
 {
 	Vector2D l_start = _currentLocation;
 	std::stack<Vector2D> l_path = Graph::GetInstance()->PathFind(l_start,
 		_goal);
+	m_path.swap(l_path);
 
-	m_path = l_path;
+	m_currentPathTarget = _goal;
+	//m_path = l_path;
 }
 
 Vector2D behaviour::FollowPath(const Vector2D& _currentPosition, const Vector2D& _currentVelocity)
@@ -344,7 +346,7 @@ Vector2D behaviour::FollowPath(const Vector2D& _currentPosition, const Vector2D&
 		t_nextNodeInPath = m_path.top();
 
 		// Checks to see if the next node in the path can be seen
-		if (!(m_path.size() > 1))
+		if ((m_path.size() > 1))
 		{
 			Vector2D t_top = m_path.top();
 			m_path.pop();
@@ -353,6 +355,7 @@ Vector2D behaviour::FollowPath(const Vector2D& _currentPosition, const Vector2D&
 			if (StaticMap::GetInstance()->IsLineOfSight(_currentPosition, t_nextLocation))
 			{
 				m_path.pop();
+				t_nextNodeInPath = m_path.top();
 			}
 
 			// Uses a circle to check if bot is arriving at the next node

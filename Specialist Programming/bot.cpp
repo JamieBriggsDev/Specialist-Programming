@@ -1,5 +1,6 @@
 #include <cmath>
 
+
 #include "Debug.h"
 #include "bot.h"
 #include "dynamicobjects.h"
@@ -10,6 +11,8 @@
 #include "AllStates.h"
 
 			
+bool Bot::m_DrawPath = false;
+bool Bot::m_DrawStats = false;
 
 float Bot::GetDistance(Vector2D _first, Vector2D _second)
 {
@@ -380,7 +383,7 @@ void Bot::StartAI()
 	Vector2D finish = Graph::GetInstance()->GetRandomNode()->m_position;
 	
 
-	m_behaviour->SetPath(Graph::GetInstance()->PathFind(start, finish));
+	//m_behaviour->SetPath(Graph::GetInstance()->PathFind(start, finish));
 	//m_currentPath = DynamicObjects::GetInstance()->GetGraph().PathFind(start, finish);
 	
 
@@ -409,7 +412,7 @@ void Bot::ProcessAI()
 		ChangeState(nullptr);
 
 	
-	Debug::GetInstance()->DrawPath(m_behaviour->GetPath(), this->m_Position);
+	//Debug::GetInstance()->DrawPath(m_behaviour->GetPath(), this->m_Position);
 
 
 
@@ -442,17 +445,57 @@ void Bot::ProcessAI()
 
 
 	// DEBUG DRAWING :: COMMENT OUT WHERE NECASARY
-	// DRAW FEELERS
-	//MyDrawEngine::GetInstance()->FillCircle(m_feeler.GetCentre(),m_feeler.GetRadius(), MyDrawEngine::WHITE);
-	//MyDrawEngine::GetInstance()->WriteInt(Vector2D(0.0f,0.0f), DynamicObjects::GetInstance()->GetGraph().GetDistance(m_Position, DynamicObjects::GetInstance()->GetGraph().m_NodeVector.at(980).m_position),MyDrawEngine::WHITE);
-	if (m_iOwnBotNumber == 0)
+	if (m_DrawPath == true)
 	{
-		DynamicObjects::GetInstance()->GetGraph().DrawNodes();
-	    DynamicObjects::GetInstance()->GetGraph().DrawEdges();
-		MyDrawEngine::GetInstance()->WriteInt( Vector2D(0, 0), m_currentPath.size(), MyDrawEngine::WHITE);
-
+		DrawPaths();
+	}
+	if (m_DrawStats == true)
+	{
+		DrawStats();
 	}
 
+}
+
+void Bot::DrawPaths()
+{
+
+	stack<Vector2D> t_temp = *m_behaviour->GetPath();
+
+	if(!t_temp.empty())
+		MyDrawEngine::GetInstance()->DrawLine(m_Position, t_temp.top(), MyDrawEngine::PURPLE);
+	else
+		MyDrawEngine::GetInstance()->DrawLine(m_Position,m_behaviour->m_currentPathTarget, MyDrawEngine::PURPLE);
+
+	while (t_temp.size() > 1)
+	{
+		Vector2D t_start = t_temp.top();
+		t_temp.pop();
+		Vector2D t_finish = t_temp.top();
+		MyDrawEngine::GetInstance()->DrawLine(t_start, t_finish, MyDrawEngine::PURPLE);
+	}
+}
+
+void Bot::DrawStats()
+{
+	Renderer* pTheRenderer = Renderer::GetInstance();
+
+		// 20 spacing per line
+		// SAY WHAT BOT
+		pTheRenderer->DrawTextAt(Vector2D(10.0f, 60.0f + (m_iOwnBotNumber * 100)), L"Bot:");
+		pTheRenderer->DrawNumberAt(Vector2D(100.0f, 60.0f + (m_iOwnBotNumber * 100)), m_iOwnBotNumber);
+	// Check if alive
+	if (IsAlive())
+	{
+		// POSITION DATA
+		pTheRenderer->DrawTextAt(Vector2D(10.0f, 80.0f + (m_iOwnBotNumber * 100)), L"Position:");
+		pTheRenderer->DrawNumberAt(Vector2D(100.0f, 80.0f + (m_iOwnBotNumber * 100)), (int)m_Position.XValue);
+		pTheRenderer->DrawNumberAt(Vector2D(160.0f, 80.0f + (m_iOwnBotNumber * 100)), (int)m_Position.YValue);
+	}
+	else
+	{
+		// SAY IS DEAD
+		pTheRenderer->DrawTextAt(Vector2D(10.0f, 80.0f + (m_iOwnBotNumber * 100)), L"BOT DEAD!!!");
+	}
 }
 
 

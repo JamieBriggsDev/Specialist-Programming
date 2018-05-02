@@ -440,7 +440,13 @@ public:
 		// Postcondition	numPoints points of the specified colour has been
 		//					plotted at x1,y1 on the back buffer.
 		// Returns			SUCCESS
-	ErrorType DrawPointList(Vector2D point[], unsigned int colour[], unsigned int numPoints);
+	ErrorType DrawPointList(Vector2D point[], unsigned int colour, unsigned int numPoints);
+
+	// Precondition		point and colour are arrays with size smaller or equal to numPoints
+	// Postcondition	numPoints points of the specified colour has been
+	//					plotted at x1,y1 on the back buffer.
+	// Returns			SUCCESS
+	ErrorType DrawLineList(Vector2D _start[], Vector2D _goal[], unsigned int colour, unsigned int numPoints);
 
 		// Precondition		The back buffer is locked.
 		// Postcondition	A line between start and end

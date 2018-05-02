@@ -23,8 +23,8 @@ public:
 class Node
 {
 public:
-	std::list<Edge> m_edgeList;
-	std::vector<Node> m_nodeList;
+	std::vector<Edge> m_edgeList;
+	//std::vector<Node> m_nodeList;
 	Node* m_parent;
 	Vector2D m_position;
 	//float h;
@@ -49,7 +49,7 @@ public:
 	std::vector<Node> m_NodeVector;
 	std::vector<Edge> m_EdgeVector;
 	void AddNode(Vector2D _location);
-	void AddEdge(Node _from, Node _to, float _cost);
+	void AddEdge(Node *_from, Node *_to, float _cost);
 	Node* GetClosestNode(Vector2D _position);
 	Vector2D GetClosestNodePosition(Vector2D _position);
 	float GetDistance(Node* _from, Node* _to);
@@ -57,6 +57,11 @@ public:
 	// For Debug
 	void DrawNodes();
 	void DrawEdges();
+	//void DrawPath();
+
+	std::vector<Vector2D> m_drawNode;
+	std::vector<Vector2D> m_drawEdgeStart;
+	std::vector<Vector2D> m_drawEdgeFinish;
 
 	// Used for A* algorithm
 	std::vector<Node*> m_closedSet;
@@ -72,7 +77,6 @@ public:
 	//std::stack<Vector2D> PathFind(Vector2D _from, Vector2D _to);
 	float findHeuristic(Node* _start, Node* _finish);
 	void DrawLists();
-	void DrawPath();
 	void AnalyseMap();
 	static int m_totalNodes;
 	void Partition(Rectangle2D _rect);

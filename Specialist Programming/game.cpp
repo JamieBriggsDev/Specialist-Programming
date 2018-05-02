@@ -106,6 +106,9 @@ ErrorType Game::RunInterface()
 
 ErrorType Game::Update()
 {
+	// DEBUG
+	MyInputs::GetInstance()->SampleKeyboard();
+
 	m_timer.mark();
 	// Cap the frame time
 	if(m_timer.m_fFrameTime>0.05f)
@@ -119,6 +122,35 @@ ErrorType Game::Update()
 	// Update Dynamic objects
 	{
 		DynamicObjects::GetInstance()->Update(m_timer.m_fFrameTime);
+
+		// DEBUG
+		if (MyInputs::GetInstance()->KeyPressed(DIK_NUMPAD0))
+		{
+			//Graph::GetInstance()->DrawEdges();
+			Bot::m_DrawPath = true;
+			Graph::GetInstance()->DrawNodes();
+			Bot::m_DrawStats = true;
+
+		}
+		else
+		{
+			Bot::m_DrawPath = false; Bot::m_DrawStats = false;
+
+			if (MyInputs::GetInstance()->KeyPressed(DIK_NUMPAD2))
+				Graph::GetInstance()->DrawEdges();
+			if (MyInputs::GetInstance()->KeyPressed(DIK_NUMPAD3))
+				Bot::m_DrawPath = true;
+			else
+				Bot::m_DrawPath = false;
+			if (MyInputs::GetInstance()->KeyPressed(DIK_NUMPAD1))
+				Graph::GetInstance()->DrawNodes();
+			if (MyInputs::GetInstance()->KeyPressed(DIK_NUMPAD4))
+				Bot::m_DrawStats = true;
+			else
+				Bot::m_DrawStats = false;
+		}
+
+
 	}
 
 	// Render

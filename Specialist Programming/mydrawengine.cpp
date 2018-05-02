@@ -531,7 +531,7 @@ ErrorType MyDrawEngine::ReloadPicture(PictureIndex pic)
 ErrorType MyDrawEngine::ClearBackBuffer()
 {
 	//Clear
-	HRESULT err = m_lpD3DDevice->Clear(0, NULL, D3DCLEAR_TARGET, 0,1.0f,0);
+	HRESULT err = m_lpD3DDevice->Clear(0, NULL, D3DCLEAR_TARGET, D3DCOLOR(0xFF404040),1.0f,0);
 
 	if(FAILED(err))
 	{
@@ -1428,7 +1428,7 @@ ErrorType MyDrawEngine::DrawPoint(Vector2D point, unsigned int colour)
 
 // **************************************************************
 
-ErrorType MyDrawEngine::DrawPointList(Vector2D points[], unsigned int colours[], unsigned int numPoints)
+ErrorType MyDrawEngine::DrawPointList(Vector2D points[], unsigned int colours, unsigned int numPoints)
 {
 	if(numPoints<=0)
 	{
@@ -1477,7 +1477,7 @@ ErrorType MyDrawEngine::DrawPointList(Vector2D points[], unsigned int colours[],
 		pVertices[i].y = p.YValue;
 		pVertices[i].z = 0.0f;
 		pVertices[i].rhw=1.0f;
-		pVertices[i].colour = colours[i];
+		pVertices[i].colour = colours;
 	}
 
 	// Finished writing
@@ -1499,6 +1499,88 @@ ErrorType MyDrawEngine::DrawPointList(Vector2D points[], unsigned int colours[],
 	vertexBuffer->Release();
 	return SUCCESS;
 }	// DrawPointList
+
+ErrorType MyDrawEngine::DrawLineList(Vector2D _start[], Vector2D _goal[], unsigned int colour, unsigned int numLines)
+{
+	if (numLines <= 0)
+	{
+		ErrorLogger::Writeln(L"Requested less than one point in DrawPointList.");
+		return FAILURE;
+	}
+
+	// Create a vertex buffer
+	LPDIRECT3DVERTEXBUFFER9 vertexBuffer;
+	HRESULT err;
+	err = m_lpD3DDevice->CreateVertexBuffer(sizeof(MYVERTEX)*numLines * 2,
+		0,
+		MYFVF,
+		D3DPOOL_MANAGED,
+		&vertexBuffer,
+		NULL);
+
+	if (FAILED(err))
+	{
+		ErrorLogger::Writeln(L"Failed to create a vertex buffer in DrawPointList");
+		ErrorLogger::Writeln(err);
+		return FAILURE;
+	}
+
+	VOID* pBuff;		// Pointer to the locked buffer 
+
+									// Lock buffer for writing
+	err = vertexBuffer->Lock(0, 0, (void**)&pBuff, 0);
+	if (FAILED(err))
+	{
+		ErrorLogger::Writeln(L"Failed to lock the vertex buffer in DrawPointList");
+		ErrorLogger::Writeln(err);
+		return FAILURE;
+	}
+
+	// Copy vertices into the buffer
+	MYVERTEX* pVertices = (MYVERTEX*)pBuff;
+	for (unsigned int i = 0; i<numLines; i += 2)
+	{
+		Vector2D p = _start[i];
+		Vector2D pg = _goal[i];
+
+		if (m_CameraActive)
+		{
+			p = theCamera.Transform(p);
+			pg = theCamera.Transform(pg);
+		}
+
+		pVertices[i].x = p.XValue;
+		pVertices[i].y = p.YValue;
+		pVertices[i].z = 0.0f;
+		pVertices[i].rhw = 1.0f;
+		pVertices[i].colour = colour;
+
+		pVertices[i + 1].x = pg.XValue;
+		pVertices[i + 1].y = pg.YValue;
+		pVertices[i + 1].z = 0.0f;
+		pVertices[i + 1].rhw = 1.0f;
+		pVertices[i + 1].colour = colour;
+	}
+
+	// Finished writing
+	vertexBuffer->Unlock();
+
+	// Set a vertex format and stream source
+	m_lpD3DDevice->SetFVF(MYFVF);
+	m_lpD3DDevice->SetStreamSource(0, vertexBuffer, 0, sizeof(MYVERTEX));
+
+	// Draw using a point list
+	err = m_lpD3DDevice->DrawPrimitive(D3DPT_LINELIST, 0, numLines);
+	if (FAILED(err))
+	{
+		ErrorLogger::Writeln(L"Failed to draw primitive in DrawPoint");
+		ErrorLogger::Writeln(err);
+		vertexBuffer->Release();
+		return FAILURE;
+	}
+	vertexBuffer->Release();
+	return SUCCESS;
+}
 
 
 

@@ -78,7 +78,7 @@ void Renderer::SetViewScale(float scale)
 
 ErrorType Renderer::DrawBlock(Rectangle2D area)
 {
-	return MyDrawEngine::GetInstance()->FillRect(area, MyDrawEngine::WHITE);
+	return MyDrawEngine::GetInstance()->FillRect(area, MyDrawEngine::BLACK);
 }
 
 bool Renderer::GetIsValid()

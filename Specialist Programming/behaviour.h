@@ -18,8 +18,8 @@ class behaviour
 {
 private:
 	std::stack<Vector2D> m_path;
-	Vector2D m_currentPathTarget;
-	Vector2D m_startTarget;
+	//Vector2D m_currentPathTarget;
+	//Vector2D m_startTarget;
 
 	// Behaviour Switches
 	bool m_isSeeking = false;
@@ -43,9 +43,10 @@ private:
 	int m_botTarget;
 	int m_dominationTarget;
 public:
+	Vector2D m_startTarget;
+	Vector2D m_currentPathTarget;
 	// Constructor (Sets bot pointers to nullptr)
 	behaviour();
-
 	// Initialise function which sets the bot
 	void Initialise(class Bot* _owner = nullptr);
 	// Sets the owner bot, called in initialise
@@ -86,7 +87,7 @@ public:
 	
 	//Bot* m_bot = nullptr;	// Pointer to bot, gets initialised in bots StartAI
 	//Bot* m_enemy = nullptr;	// Pointer to enemy bot
-	void SetPath(std::stack<Vector2D> _path);
+	void SetPath(std::stack<Vector2D> _path) { m_path = _path; }
 	void SetPath(Vector2D _goal, Vector2D _currentLocation);
 	std::stack<Vector2D>* GetPath() { return &m_path; }
 
@@ -102,7 +103,7 @@ public:
 	void SetPursuit(bool _toggle) { m_isPursuiting = _toggle; }
 	void SetEvade(bool _toggle) { m_isEvading = _toggle; }
 	void SetFlee(bool _toggle) { m_isFleeing = _toggle; }
-	void SetPath(bool _toggle) { m_isFollowingPath = _toggle; }
+	void SetFollowingPath(bool _toggle) { m_isFollowingPath = _toggle; }
 	void SetWalls(bool _toggle) { m_isAvoidingWalls = _toggle; }
 
 	// The seven behaviours, all return a Vector2D which is to be added to the bot acceleration

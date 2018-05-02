@@ -17,6 +17,8 @@ class Bot
 	friend class Capture;
 	friend class behaviour;
 protected:
+
+
 	Vector2D m_Position;			// Current world coordinates
 	Vector2D m_Velocity;			// Current velocity
 	Vector2D m_Acceleration;
@@ -33,10 +35,9 @@ protected:
 	float m_dAccuracy;				// Accuracy of the current firing solution (1==100%)
 	int m_iHealth;					// Health (up to 100)
 
-	Graph m_myGraph;
-
-	std::vector<Vector2D> m_currentPath;
-	int m_pathIndex;
+	//Graph m_myGraph;
+	//std::vector<Vector2D> m_currentPath;
+	//int m_pathIndex;
 
 	bool m_bSeekOn;
 	bool m_bHideOn;
@@ -67,22 +68,7 @@ public:
 	{
 		return m_iOwnBotNumber;
 	}
-	int GetPathIndex()
-	{
-		return m_pathIndex;
-	}
-	std::vector<Vector2D> GetCurrentPath()
-	{
-		return m_currentPath;
-	}
-	void NextPathLocation()
-	{
-		m_pathIndex += 1;
-		if (m_pathIndex >= (int)m_currentPath.size())
-		{
-			m_pathIndex = m_currentPath.size() - 1;
-		}
-	}
+
 
 	float GetDistance(Vector2D _first, Vector2D _second);
 
@@ -171,4 +157,9 @@ public:
 	Vector2D GetAcceleration() { return m_Acceleration; }
 	// Set Acceleration
 	void SetAcceleration(Vector2D _acceleration) { m_Acceleration = _acceleration; }
+
+	static bool m_DrawPath;
+	void DrawPaths();
+	static bool m_DrawStats;
+	void DrawStats();
 };
