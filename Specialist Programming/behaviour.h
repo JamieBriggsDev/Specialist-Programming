@@ -35,14 +35,14 @@ private:
 	bool m_isWantingToStop = false;
 	bool m_isAttemptingShotAtTarget = false;
 
-	// Owner and target bot
-	class Bot* m_owner;
-	class Bot* m_botToShoot;
 
 	// IDs to bot and target
 	int m_botTarget;
 	int m_dominationTarget;
 public:
+	// Owner and target bot
+	class Bot* m_owner;
+	class Bot* m_botToShoot;
 	Vector2D m_startTarget;
 	Vector2D m_currentPathTarget;
 	// Constructor (Sets bot pointers to nullptr)
@@ -56,6 +56,8 @@ public:
 
 	// Get Owner Bot
 	class Bot* GetOwnerBot() { return m_owner; }
+
+	bool IsTargetAlive();
 	// Get Current State
 	//State<Bot>* GetCurrentState() { return m_currentState; }
 	// Set new state

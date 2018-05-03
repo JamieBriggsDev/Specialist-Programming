@@ -1,11 +1,17 @@
 #pragma once
 
+/////////////////////////////////////////////////
 
-enum class StateNames{CAPTURE};
+#define ENEMY_TARGET_RANGE 550.0f
+
+/////////////////////////////////////////////////
+
+enum class StateNames{CAPTURE, ATTACK};
 
 template<class EntityType>
 class State
 {
+	friend class behaviour;
 private:
 	// Classes which use this class template will make singleton
 	//  functions to get instance
@@ -16,8 +22,6 @@ public:
 	virtual void Enter(EntityType*) = 0;
 	virtual void Update(EntityType*) = 0;
 	virtual void Exit(EntityType*) = 0;
-
-	StateNames GetStateName() { return m_name; }
+	virtual wchar_t* GetName() = 0;
 
 };
-

@@ -133,7 +133,7 @@ void Graph::Partition(Rectangle2D _rect)
 	
 	// Makes sure that once the area of the rectangle
 	//  gets too small, it stops partitioning.
-	if (_rect.GetArea() < 1247)
+	if (_rect.GetArea() < 1066)
 	{
 		m_totalNodes += 1;
 		return;

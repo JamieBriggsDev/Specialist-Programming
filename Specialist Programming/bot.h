@@ -13,8 +13,12 @@ enum States { HUNT , TOTAL_STATES};
 
 class Bot
 {
+	// STATES
 	friend class State<Bot>;
 	friend class Capture;
+	friend class Attack;
+
+
 	friend class behaviour;
 protected:
 
@@ -52,6 +56,7 @@ protected:
 	State<class Bot>* m_previousState;
 	void ChangeState(State<Bot>* _state);
 
+	int GetAmmo() { return m_iAmmo; }
 
 private:
 

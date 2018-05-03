@@ -1,4 +1,5 @@
 #include "sCapture.h"
+#include "sAttack.h"
 #include "dynamicObjects.h"
 
 // static instance
@@ -17,7 +18,7 @@ void Capture::Enter(Bot * pBot)
 {
 	// Sets target domination point and sets behaviour for bot
 	SetTarget(pBot);
-	pBot->m_behaviour->SetBehaviours(0, 0, 0, 0, 0, 1, 1);
+	pBot->m_behaviour->SetBehaviours(0, 0, 0, 0, 0, 1);
 }
 
 void Capture::Update(Bot* pBot)
@@ -74,12 +75,11 @@ void Capture::CheckForEnemy(Bot* pBot)
 				GetLocation()).magnitude() <= 400 && DynamicObjects::GetInstance()->
 			GetBot(1, i).IsAlive())
 		{
-			//pBot->ChangeState(Attack::GetInstance());
+			pBot->ChangeState(Attack::GetInstance());
 		}
 	}
 
 } 
-
 
 void Capture::CheckDPOwner(Bot* pBot)
 { 
@@ -91,3 +91,8 @@ void Capture::CheckDPOwner(Bot* pBot)
 	}
 
 } 
+
+wchar_t* Capture::GetName()
+{
+	return L"CAPTURE";
+}

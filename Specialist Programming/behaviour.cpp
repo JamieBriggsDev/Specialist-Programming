@@ -1,4 +1,6 @@
 #include "behaviour.h"
+#include "Renderer.h"
+#include "mydrawengine.h"
 
 behaviour::behaviour() : m_owner(nullptr), m_botToShoot(nullptr)//, m_currentState(nullptr), m_previousState(nullptr)
 {
@@ -20,87 +22,14 @@ void behaviour::Update()
 {
 }
 
-//void behaviour::SetCurrentState(State<Bot>* _newState)
-//{
-//
-//}
-
-//void behaviour::MoveTo(Vector2D _target)
-//{
-//	// First check if the bot can see the target, if not 
-//	//  then use A* to find the path to the target
-//	if (StaticMap::GetInstance()->
-//		IsLineOfSight(m_owner->GetLocation(), _target))
-//	{
-//		m_isSeeking = true;
-//		m_isFollowingPath = false;
-//		m_currentPathTarget = _target;
-//	}
-//	else
-//	{
-//		m_path = Graph::GetInstance()->PathFind(Graph::GetInstance()->
-//			GetClosestNodePosition(m_owner->GetLocation()),
-//			Graph::GetInstance()->
-//			GetClosestNodePosition(_target));
-//		m_startTarget = _target;
-//		m_isFollowingPath = true;
-//		m_isSeeking = false;
-//	}
-//	m_isWantingToStop = true;
-//}
-//
-//void behaviour::StopMoving()
-//{
-//	m_isWantingToStop = true;
-//	m_isSeeking = false;
-//	m_isFollowingPath = false;
-//}
-//
-//bool behaviour::CanSeeBotToShoot()
-//{
-//	return StaticMap::GetInstance()->
-//		IsLineOfSight(m_owner->GetLocation(), m_botToShoot->GetLocation());
-//}
-//
-//bool behaviour::CanSeePathToTargetLocation()
-//{
-//	return StaticMap::GetInstance()->
-//		IsLineOfSight(m_owner->GetLocation(), m_startTarget);
-//}
-//
-//void behaviour::OnRespawn()
-//{
-//	// STATE MACHINE RESET WITH IF(m_myStateMachine)
-//
-//	m_isWantingToStop = false;
-//}
-//
-//void behaviour::SeekToTarget()
-//{
-//	// Makes owners acceleration to output of seek to target
-//	m_owner->m_Acceleration = Seek(m_owner->m_Position,
-//		m_owner->m_Velocity, m_currentPathTarget);
-//	if (IsCloseToSeekTarget())
-//	{
-//		m_isSeeking = false;
-//	}
-//}
-//
-//void behaviour::OnTakeDamage()
-//{
-//	//RETALIATE CODE
-//}
-//
-//bool behaviour::IsCloseToSeekTarget(float _distance)
-//{
-//	if ((m_owner->GetLocation() - m_currentPathTarget).magnitude() <= _distance)
-//		return true;
-//	else
-//		return false;
-//}
+bool behaviour::IsTargetAlive()
+{
+	return m_botToShoot->IsAlive();
+}
 
 
-void behaviour::SetBehaviours(bool _seek, bool _arrive, bool _pursuit, bool _evade, bool flee, bool walls, bool path)
+void behaviour::SetBehaviours(bool _seek, bool _arrive, bool _pursuit,
+bool _evade, bool flee, bool path, bool walls)
 {
 	m_isSeeking = _seek;
 	m_isArriving = _arrive;
@@ -162,10 +91,13 @@ Vector2D behaviour::AvoidWall(const Vector2D& _currentPosition, const Vector2D& 
 {
 	Vector2D t_projection = _currentVelocity.unitVector() * 50;
 	// Make collision circles, small for complete collision, big for avoiding collision
-	Circle2D t_smallCollisionCircle(_currentPosition + t_projection, 3.0f);
-	Circle2D t_bigCollisionCircle(_currentPosition + t_projection, 15.0f);
+	Circle2D t_smallCollisionCircle(_currentPosition + t_projection, 30.0f);
+	Circle2D t_bigCollisionCircle(_currentPosition + t_projection, 50.0f);
 
-	// Create a Vector2D for velocity and init to 0
+	MyDrawEngine::GetInstance()->DrawLine(_currentPosition, _currentPosition + t_projection, MyDrawEngine::RED);
+
+
+	// Vector2D for velocity
 	Vector2D t_desiredVelocity;
 	t_desiredVelocity.set(0, 0);
 
@@ -177,9 +109,9 @@ Vector2D behaviour::AvoidWall(const Vector2D& _currentPosition, const Vector2D& 
 
 		// If the small circle is inside the block, increase velocity
 		if (StaticMap::GetInstance()->IsInsideBlock(t_smallCollisionCircle))
-			t_desiredVelocity *= 10000;
+			t_desiredVelocity *= 12000;
 		else
-			t_desiredVelocity *= 5000;
+			t_desiredVelocity *= 6000;
 	}
 
 	return t_desiredVelocity;
@@ -189,7 +121,7 @@ Vector2D behaviour::AccumilateBehaviours(const Vector2D& _currentPosition, const
 	const Vector2D& _targetPosition, const Vector2D& _targetVelocity)
 {
 	Vector2D t_tempAcceleration[7];
-	Vector2D t_acceleration;
+	Vector2D t_acceleration = Vector2D(0.0f, 0.0f);
 	// ADD ALL SEVEN BEHAVIOUR STATES TO T_ACCELERATION AND RETURN
 	if (m_isSeeking)
 		t_tempAcceleration[0] = Seek(_currentPosition, _currentVelocity, _targetPosition);
@@ -211,6 +143,10 @@ Vector2D behaviour::AccumilateBehaviours(const Vector2D& _currentPosition, const
 		t_acceleration += t_tempAcceleration[i];
 	}
 
+	if (m_owner->m_currentState->m_name == StateNames::ATTACK)
+	{
+		t_acceleration += Vector2D(0.0f, 0.0f);
+	}
 
 	return t_acceleration;
 }

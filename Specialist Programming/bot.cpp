@@ -411,33 +411,18 @@ void Bot::ProcessAI()
 	else
 		ChangeState(nullptr);
 
-	
-	//Debug::GetInstance()->DrawPath(m_behaviour->GetPath(), this->m_Position);
-
-
-
-
-	// Update Feeler (checks for collision) and check for wall collision
-	//m_feeler.PlaceAt(m_Position + 10.0f * m_Velocity.unitVector(), 50.0f);
-	//if (StaticMap::GetInstance()->IsInsideBlock(m_feeler))
-	//m_Acceleration += m_behaviour->AvoidWall(m_feeler);
-
-
-
-
-
-	if (m_Velocity.magnitude() > MAXBOTSPEED)
-	{
-		m_Velocity = m_Velocity.unitVector();
-		m_Velocity *= MAXBOTSPEED;
-	}
+	//if (m_Velocity.magnitude() > MAXBOTSPEED)
+	//{
+	//	m_Velocity = m_Velocity.unitVector();
+	//	m_Velocity *= MAXBOTSPEED;
+	//}
 
 	// Check for bot collision
 	//m_Acceleration += m_behaviour->AvoidBots(TeamBotLocations);
 
 
 	// UPDATE VELOCITY AT THE END
-	m_Velocity += m_Acceleration;
+	//m_Velocity += m_Acceleration;
 
 
 
@@ -490,6 +475,9 @@ void Bot::DrawStats()
 		pTheRenderer->DrawTextAt(Vector2D(10.0f, 80.0f + (m_iOwnBotNumber * 100)), L"Position:");
 		pTheRenderer->DrawNumberAt(Vector2D(100.0f, 80.0f + (m_iOwnBotNumber * 100)), (int)m_Position.XValue);
 		pTheRenderer->DrawNumberAt(Vector2D(160.0f, 80.0f + (m_iOwnBotNumber * 100)), (int)m_Position.YValue);
+		// STATE DATA
+		pTheRenderer->DrawTextAt(Vector2D(10.0f, 100.0f + (m_iOwnBotNumber * 100)), L"State:");
+		pTheRenderer->DrawTextAt(Vector2D(100.0f, 100.0f + (m_iOwnBotNumber * 100)), m_currentState->GetName());
 	}
 	else
 	{

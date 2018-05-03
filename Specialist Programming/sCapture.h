@@ -35,7 +35,6 @@ public:
 	// Set Target will:
 	// - Finds a domination point
 	// - Finds a path to the domination point
-	// - Sets behaviours for the state
 	void SetTarget(Bot* pBot);
 
 	// Checks distance from bot to target
@@ -46,5 +45,7 @@ public:
 
 	// Check who owns domination point
 	void CheckDPOwner(Bot* pBot);
+
+	wchar_t * GetName();
 
 };
