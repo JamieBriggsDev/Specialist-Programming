@@ -17,7 +17,7 @@ class Bot
 	friend class State<Bot>;
 	friend class Capture;
 	friend class Attack;
-
+	friend class Reload;
 
 	friend class behaviour;
 protected:
@@ -74,6 +74,10 @@ public:
 		return m_iOwnBotNumber;
 	}
 
+	//int GetAmmo()
+	//{
+	//	return m_iAmmo;
+	//}
 
 	float GetDistance(Vector2D _first, Vector2D _second);
 

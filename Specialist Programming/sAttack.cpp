@@ -1,5 +1,6 @@
 #include "sAttack.h"
 #include "sCapture.h"
+#include "sReload.h"
 #include "dynamicObjects.h"
 #include "bot.h"
 
@@ -25,12 +26,12 @@ void Attack::Enter(Bot * pBot)
 void Attack::Update(Bot * pBot)
 {
 	// Check ammo first (RELOAD)
-	//if (pBot->GetAmmo() < 1)
-	//{
-	//	pBot->ChangeState(Capture::GetInstance());
-	//}
+	if (pBot->GetAmmo() < 1)
+	{
+		pBot->ChangeState(Reload::GetInstance());
+	}
 	// Check if target is alive or out of sight
-	if (!pBot->m_behaviour->IsTargetAlive() ||
+	else if (!pBot->m_behaviour->IsTargetAlive() ||
 		!StaticMap::GetInstance()->IsLineOfSight(pBot->GetLocation(),
 			pBot->m_behaviour->m_botToShoot->GetLocation()))
 	{

@@ -93,6 +93,9 @@
     <ClInclude Include="sAttack.h">
       <Filter>States</Filter>
     </ClInclude>
+    <ClInclude Include="sReload.h">
+      <Filter>States</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="bot.cpp">
@@ -159,6 +162,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="sAttack.cpp">
+      <Filter>States</Filter>
+    </ClCompile>
+    <ClCompile Include="sReload.cpp">
       <Filter>States</Filter>
     </ClCompile>
   </ItemGroup>

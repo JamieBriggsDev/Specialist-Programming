@@ -169,6 +169,7 @@
     <ClInclude Include="sCapture.h" />
     <ClInclude Include="Shapes.h" />
     <ClInclude Include="SoundPlayer.h" />
+    <ClInclude Include="sReload.h" />
     <ClInclude Include="State.h" />
     <ClInclude Include="staticmap.h" />
     <ClInclude Include="vector2D.h" />
@@ -192,6 +193,7 @@
     <ClCompile Include="sAttack.cpp" />
     <ClCompile Include="sCapture.cpp" />
     <ClCompile Include="Shapes.cpp" />
+    <ClCompile Include="sReload.cpp" />
     <ClCompile Include="State.cpp" />
     <ClCompile Include="staticmap.cpp" />
     <ClCompile Include="vector2D.cpp" />

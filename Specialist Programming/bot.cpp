@@ -475,9 +475,12 @@ void Bot::DrawStats()
 		pTheRenderer->DrawTextAt(Vector2D(10.0f, 80.0f + (m_iOwnBotNumber * 100)), L"Position:");
 		pTheRenderer->DrawNumberAt(Vector2D(100.0f, 80.0f + (m_iOwnBotNumber * 100)), (int)m_Position.XValue);
 		pTheRenderer->DrawNumberAt(Vector2D(160.0f, 80.0f + (m_iOwnBotNumber * 100)), (int)m_Position.YValue);
+		// AMMO DATA
+		pTheRenderer->DrawTextAt(Vector2D(10.0f, 100.0f + (m_iOwnBotNumber * 100)), L"Ammo:");
+		pTheRenderer->DrawNumberAt(Vector2D(100.0f, 100.0f + (m_iOwnBotNumber * 100)), m_iAmmo);
 		// STATE DATA
-		pTheRenderer->DrawTextAt(Vector2D(10.0f, 100.0f + (m_iOwnBotNumber * 100)), L"State:");
-		pTheRenderer->DrawTextAt(Vector2D(100.0f, 100.0f + (m_iOwnBotNumber * 100)), m_currentState->GetName());
+		pTheRenderer->DrawTextAt(Vector2D(10.0f, 120.0f + (m_iOwnBotNumber * 100)), L"State:");
+		pTheRenderer->DrawTextAt(Vector2D(100.0f, 120.0f + (m_iOwnBotNumber * 100)), m_currentState->GetName());
 	}
 	else
 	{

@@ -6,7 +6,7 @@
 
 /////////////////////////////////////////////////
 
-enum class StateNames{CAPTURE, ATTACK};
+enum class StateNames{CAPTURE, ATTACK, RELOAD};
 
 template<class EntityType>
 class State
