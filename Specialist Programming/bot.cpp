@@ -1,5 +1,5 @@
 #include <cmath>
-
+#include <chrono>
 
 #include "Debug.h"
 #include "bot.h"
@@ -377,6 +377,8 @@ void Bot::StartAI()
 	m_currentState = nullptr;
 	m_previousState = nullptr;
 
+	m_msHighestUpdateTime = 0;
+	m_msUpdateTime = 0;
 
 	Vector2D start = Vector2D(-1400.0f, 0.0f);
 	//Vector2D finish = Vector2D(0.0f, 0.0f);
@@ -397,6 +399,10 @@ void Bot::StartAI()
 // Eventually, this will contain very little code - it just runs the state
 void Bot::ProcessAI()
 {
+
+	// DEBUGGING UPDATE TIME
+	auto t_start = std::chrono::high_resolution_clock::now();
+
 	// Update bots behaviour variables at the start
 	if (IsAlive())
 	{
@@ -424,9 +430,16 @@ void Bot::ProcessAI()
 	// UPDATE VELOCITY AT THE END
 	//m_Velocity += m_Acceleration;
 
+	// DEBUG TIME FINISHED
+	auto t_finish = std::chrono::high_resolution_clock::now();
 
+	std::chrono::duration<double> t_msUpdateTime = t_finish - t_start;
 
+	if(t_msUpdateTime.count() > m_msHighestUpdateTime)
+		m_msHighestUpdateTime = t_msUpdateTime.count();
 
+	m_msUpdateTime = t_msUpdateTime.count();
+	///////////////////////////////////////////
 
 
 	// DEBUG DRAWING :: COMMENT OUT WHERE NECASARY
@@ -464,6 +477,7 @@ void Bot::DrawStats()
 {
 	Renderer* pTheRenderer = Renderer::GetInstance();
 
+		// LEFT SIDE~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 		// 20 spacing per line
 		// SAY WHAT BOT
 		pTheRenderer->DrawTextAt(Vector2D(10.0f, 60.0f + (m_iOwnBotNumber * 100)), L"Bot:");
@@ -486,6 +500,17 @@ void Bot::DrawStats()
 	{
 		// SAY IS DEAD
 		pTheRenderer->DrawTextAt(Vector2D(10.0f, 80.0f + (m_iOwnBotNumber * 100)), L"BOT DEAD!!!");
+	}
+
+
+	// RIGHT SIDE~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+	if (IsAlive())
+	{
+		pTheRenderer->DrawTextAt(Vector2D(1500.0f, 80.0f + (m_iOwnBotNumber * 100)), L"       FRAMETIME:");
+		pTheRenderer->DrawNumberAt(Vector2D(1750.0f, 80.0f + (m_iOwnBotNumber * 100)), m_msUpdateTime);
+		pTheRenderer->DrawTextAt(Vector2D(1500.0f, 100.0f + (m_iOwnBotNumber * 100)), L"HIGHESTFRAMETIME:");
+		pTheRenderer->DrawNumberAt(Vector2D(1750.0f, 100.0f + (m_iOwnBotNumber * 100)), m_msHighestUpdateTime);
+
 	}
 }
 

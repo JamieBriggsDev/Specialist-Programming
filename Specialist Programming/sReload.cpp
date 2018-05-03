@@ -47,7 +47,6 @@ void Reload::SetTarget(Bot * pBot)
 
 void Reload::CheckDistance(Bot* pBot)
 { 
-
 	// Clears the path if target is in sight
 	if (StaticMap::GetInstance()->IsLineOfSight(pBot->GetLocation(),
 		pBot->m_behaviour->m_currentPathTarget))

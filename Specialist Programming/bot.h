@@ -22,7 +22,7 @@ class Bot
 	friend class behaviour;
 protected:
 
-
+	
 	Vector2D m_Position;			// Current world coordinates
 	Vector2D m_Velocity;			// Current velocity
 	Vector2D m_Acceleration;
@@ -65,7 +65,8 @@ public:
 	Bot();	
 	// Runs once each frame. Handles physics, shooting, and calls
 	// Made to delete the behaviour member
-
+	double m_msHighestUpdateTime;
+	double m_msUpdateTime;
 	// Pointer to bots behaviour, gets initialised in bots StartAI
 	behaviour* m_behaviour = nullptr;
 
