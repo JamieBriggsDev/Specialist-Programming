@@ -1,6 +1,9 @@
 #pragma once
 
+#define USE_THREADS true
+
 #include <stack>
+#include <thread>
 
 #include "shapes.h"
 #include "rules.h"
@@ -17,6 +20,9 @@ struct SupplyPoint;		// Tells behaviour there is a supply point
 class behaviour
 {
 private:
+
+	// Path find thread
+	std::thread *m_pathThread;
 	std::stack<Vector2D> m_path;
 	//Vector2D m_currentPathTarget;
 	//Vector2D m_startTarget;
@@ -37,6 +43,7 @@ private:
 
 
 	// IDs to bot and target
+	int m_ownerID;
 	int m_botTarget;
 	int m_dominationTarget;
 public:
@@ -47,6 +54,11 @@ public:
 	Vector2D m_currentPathTarget;
 	// Constructor (Sets bot pointers to nullptr)
 	behaviour();
+	~behaviour()
+	{
+		if (USE_THREADS)
+			m_pathThread->join();
+	}
 	// Initialise function which sets the bot
 	void Initialise(class Bot* _owner = nullptr);
 	// Sets the owner bot, called in initialise

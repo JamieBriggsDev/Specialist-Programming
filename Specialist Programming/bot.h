@@ -3,8 +3,6 @@
 #include "behaviour.h"
 #include "shapes.h"
 #include "rules.h"
-#include "navMesh.h"
-
 
 class behaviour;
 class botController;
@@ -61,7 +59,9 @@ protected:
 private:
 
 
+
 public:
+	//TPathFinder m_myPathFinder;
 	Bot();	
 	// Runs once each frame. Handles physics, shooting, and calls
 	// Made to delete the behaviour member

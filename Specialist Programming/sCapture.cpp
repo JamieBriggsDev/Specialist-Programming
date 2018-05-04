@@ -17,8 +17,8 @@ Capture * Capture::GetInstance()
 void Capture::Enter(Bot * pBot)
 {
 	// Sets target domination point and sets behaviour for bot
-	SetTarget(pBot);
 	pBot->m_behaviour->SetBehaviours(0, 0, 0, 0, 0, 1);
+	SetTarget(pBot);
 }
 
 void Capture::Update(Bot* pBot)
@@ -43,6 +43,8 @@ void Capture::SetTarget(Bot * pBot)
 
 	pBot->m_behaviour->SetPath(DynamicObjects::GetInstance()->
 		GetDominationPoint(pBot->m_behaviour->GetDominationID()).m_Location, pBot->GetLocation());
+
+	//pBot->m_behaviour->m_myPathFinder.FindPath(Vector2D(0.0f, 0.0f), Vector2D(0.0f, 0.0f));
 	//pBot->m_behaviour->SetPath(Vector2D(0.0f, 0.0f), pBot->GetLocation());
 }
 
@@ -53,7 +55,7 @@ void Capture::CheckDistance(Bot* pBot)
 	if (StaticMap::GetInstance()->IsLineOfSight(pBot->GetLocation(),
 		DynamicObjects::GetInstance()->GetDominationPoint(pBot->m_behaviour->GetDominationID()).m_Location))
 	{
-		pBot->m_behaviour->SetBehaviours(1, 0, 0, 0, 0, 1, 0);
+		pBot->m_behaviour->SetBehaviours(1, 0, 0, 0, 0, 1);
 		// Clear path
 		while(!pBot->m_behaviour->GetPath()->empty())
 			pBot->m_behaviour->GetPath()->pop();

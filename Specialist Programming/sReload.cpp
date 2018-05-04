@@ -51,13 +51,13 @@ void Reload::CheckDistance(Bot* pBot)
 	if (StaticMap::GetInstance()->IsLineOfSight(pBot->GetLocation(),
 		pBot->m_behaviour->m_currentPathTarget))
 	{
-		pBot->m_behaviour->SetBehaviours(1, 0, 0, 0, 0, 1, 0);
+		pBot->m_behaviour->SetBehaviours(1, 0, 0, 0, 0, 1);
 		// Clear path
 		while(!pBot->m_behaviour->GetPath()->empty())
 			pBot->m_behaviour->GetPath()->pop();
 	}
 
-	if ((pBot->GetLocation() - pBot->m_behaviour->m_currentPathTarget).magnitude() < 10.0f)
+	if ((pBot->GetLocation() - pBot->m_behaviour->m_currentPathTarget).magnitude() < 0.5f)
 	{
 		pBot->m_behaviour->SetBehaviours(0, 0, 0, 0, 0, 0, 1);
 		if(pBot->GetAmmo())

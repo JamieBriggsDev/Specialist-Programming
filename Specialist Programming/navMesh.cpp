@@ -1,12 +1,19 @@
 #include <time.h>
+#include <mutex>
 
 #include "navMesh.h"
 #include "mydrawengine.h"
 #include "rules.h"
 
-#define add(n) push_back(n)
+#define add(x) push_back(x)
 
 Graph* Graph::m_instance = nullptr;
+
+std::mutex g_mutex;
+
+#define THREADLOCK g_mutex.lock()
+#define THREADUNLOCK g_mutex.unlock()
+
 
 void Graph::AddNode(Vector2D _location)
 {
@@ -133,7 +140,7 @@ void Graph::Partition(Rectangle2D _rect)
 	
 	// Makes sure that once the area of the rectangle
 	//  gets too small, it stops partitioning.
-	if (_rect.GetArea() < 1066)
+	if (_rect.GetArea() < 1367)
 	{
 		m_totalNodes += 1;
 		return;
@@ -177,6 +184,7 @@ void Graph::Partition(Rectangle2D _rect)
 
 void Graph::FindPaths()
 {
+
 	StaticMap* pStaticMap = StaticMap::GetInstance();
 
 	int l_NodeVectorSize = m_NodeVector.size();
@@ -230,7 +238,9 @@ void Graph::FindPaths()
 	}
 
 }
-std::stack<Vector2D> Graph::PathFind(Vector2D _from, Vector2D _to)
+
+
+std::stack<Vector2D> Graph::PathFind(const Vector2D _from, const Vector2D _to, const int _bot)
 {
 	// #0	-	Initialise starting variables
 	// Temp variable for nodes neighbours
@@ -238,8 +248,8 @@ std::stack<Vector2D> Graph::PathFind(Vector2D _from, Vector2D _to)
 	// Temp g score variable
 	float l_tentativeGScore;
 
-	while (!m_path.empty())
-		m_path.pop();
+	while (!m_path[_bot].empty())
+		m_path[_bot].pop();
 
 	// Makes sure sets are all empty
 	m_closedSet.clear();
@@ -265,12 +275,13 @@ std::stack<Vector2D> Graph::PathFind(Vector2D _from, Vector2D _to)
 		// recreate the path
 		if (m_currentPtr->m_position == l_goal->m_position)
 		{
+			m_path[_bot].push(_to);
 			while (m_currentPtr)
 			{
-				m_path.push(m_currentPtr->m_position);
+				m_path[_bot].push(m_currentPtr->m_position);
 				if (m_currentPtr->m_parent != nullptr)
 					m_currentPtr = m_currentPtr->m_parent;
-				else return m_path;
+				else return m_path[_bot];
 			}
 
 			break;
@@ -350,14 +361,163 @@ std::stack<Vector2D> Graph::PathFind(Vector2D _from, Vector2D _to)
 	}// while loop
 
 	 // if fails, return l_path with one position = 0.0f, 0.0f
-	if (!m_path.empty())
+	if (!m_path[_bot].empty())
 	{
-		return m_path;
+		return m_path[_bot];
 	}
 	else
 	{
-		//m_path.push(Vector2D(0.0f, 0.0f));
-		return m_path;
+		//m_path[_bot].push(Vector2D(0.0f, 0.0f));
+		return m_path[_bot];
+	}
+}
+
+void Graph::StartThreadedPathFind(const Vector2D _from, const Vector2D _to, const int _bot, std::thread * _thread)
+{
+	_thread = new std::thread(&Graph::ThreadedPathFind, this, _from, _to, _bot);
+}
+
+
+void Graph::ThreadedPathFind(const Vector2D _from, const Vector2D _to, const int _bot)
+{
+	THREADLOCK;
+	// #0	-	Initialise starting variables
+	// Temp variable for nodes neighbours
+	std::vector<Node*> l_neighbors;
+	// Temp g score variable
+	float l_tentativeGScore;
+
+	while (!m_path[_bot].empty())
+		m_path[_bot].pop();
+
+	// Makes sure sets are all empty
+	m_closedSet.clear();
+	m_openSet.clear();
+
+	// Gets start and finish nodes
+	Node* l_start = GetClosestNode(_from);
+	Node* l_goal = GetClosestNode(_to);
+
+	// #1	-	Put start node into the open list with variables initialised
+	l_start->m_parent = nullptr;
+	l_start->g = 0.0f;
+	l_start->f = findHeuristic(l_start, l_goal);
+	m_openSet.add(l_start);
+
+	// #2 Start loop
+	while (!m_openSet.empty())
+	{
+		// #3	-	Find node with smalled f value in open list;
+		m_currentPtr = FindLowestFScoreNode(m_openSet);
+
+		// #FINSIH	-	 This is the finish point which will
+		// recreate the path
+		if (m_currentPtr->m_position == l_goal->m_position)
+		{
+			m_path[_bot].push(_to);
+			while (m_currentPtr)
+			{
+				m_path[_bot].push(m_currentPtr->m_position);
+				if (m_currentPtr->m_parent != nullptr)
+					m_currentPtr = m_currentPtr->m_parent;
+				else 
+				{
+					m_pathReady[_bot] = true;
+					THREADUNLOCK;
+					return;
+					//return m_path[_bot];
+				}
+			}
+
+			break;
+		}
+
+		// #4	-	Remove current node from open set and add to closed set
+		m_closedSet.add(m_currentPtr);
+
+		///////////
+		RemoveElementFromVector(m_openSet, m_currentPtr);
+
+		// #5 - Get nodes neighbours
+		for (int i = 0; i < m_currentPtr->m_edgeList.size(); i++)
+		{
+			l_neighbors.push_back(m_currentPtr->m_edgeList[i].m_toNode);
+		}
+
+		// #6	-	Go through all neighbours. 
+		//			- If its in the closed set, ignore it
+		//			- If the node isn't in the open set, add it with variables
+		//			- if its in the open set, check to see if it f value is bigger then this path,
+		//				and if it is, change it
+		for (int i = 0; i < (int)l_neighbors.size(); i++)
+		{
+			// if node is within the closed set, skip the node
+			if (ElementInVector(m_closedSet, l_neighbors.at(i)))
+			{
+				continue;
+			}
+			else
+			{
+				//// The distance from start to a neighbor
+				l_tentativeGScore = m_currentPtr->g +
+					GetDistance(m_currentPtr, l_neighbors.at(i));
+
+				// If the node is not in the open set or the distance traveled is shorted then
+				//  its set G value
+				//if (!ElementInVector(l_openSet, l_neighbors.at(i)) ||
+				//	l_tentativeGScore < l_neighbors.at(i).g)
+				//{
+				//	l_neighbors.at(i).g = l_tentativeGScore;
+				//	l_neighbors.at(i).f = l_neighbors.at(i).g +
+				//		findHeuristic(l_neighbors.at(i), l_goal);
+				//	l_neighbors.at(i).m_parent = m_currentPtr;
+				//	// If its not in the open list, add it
+				//	if (!ElementInVector(l_openSet, l_neighbors.at(i)))
+				//	{
+				//		l_openSet.push_back(l_neighbors.at(i));
+				//	}
+				//}
+
+				// Isnt in open set
+				if (!ElementInVector(m_openSet, l_neighbors[i]) ||
+					l_tentativeGScore < l_neighbors[i]->g)
+				{
+					l_neighbors.at(i)->m_parent = m_currentPtr;
+					l_neighbors.at(i)->g = l_tentativeGScore;
+					l_neighbors.at(i)->f = l_neighbors.at(i)->g +
+						findHeuristic(l_neighbors.at(i), l_goal);
+					m_openSet.add(l_neighbors.at(i));
+				}
+				// Is in open set
+				else
+				{
+					if (l_tentativeGScore + findHeuristic(l_neighbors.at(i), l_goal) <
+						l_neighbors.at(i)->f)
+					{
+						l_neighbors.at(i)->g = l_tentativeGScore;
+						l_neighbors.at(i)->f = l_neighbors.at(i)->g +
+							findHeuristic(l_neighbors.at(i), l_goal);
+						l_neighbors.at(i)->m_parent = m_currentPtr;
+					}
+				}
+
+			}// if not in closed set
+		}// for loop
+	}// while loop
+
+	 // if fails, return l_path with one position = 0.0f, 0.0f
+	if (!m_path[_bot].empty())
+	{
+		m_pathReady[_bot] = false;
+		THREADUNLOCK;
+		return;
+	}
+	else
+	{
+		//m_path[_bot].push(Vector2D(0.0f, 0.0f));
+		m_pathReady[_bot] = false;
+		THREADUNLOCK;
+		return;
 	}
 }
 
@@ -395,10 +555,10 @@ std::stack<Vector2D> Graph::PathFind(Vector2D _from, Vector2D _to)
 //		{
 //			while (m_currentPtr)
 //			{
-//				m_path.push(m_currentPtr->m_position);
+//				m_path[_bot].push(m_currentPtr->m_position);
 //				if (m_currentPtr->m_parent != nullptr)
 //					m_currentPtr = m_currentPtr->m_parent;
-//				else return m_path;
+//				else return m_path[_bot];
 //			}
 //
 //			break;
@@ -496,14 +656,14 @@ std::stack<Vector2D> Graph::PathFind(Vector2D _from, Vector2D _to)
 //	}// while loop
 //
 //	 // if fails, return l_path with one position = 0.0f, 0.0f
-//	if (!m_path.empty())
+//	if (!m_path[_bot].empty())
 //	{
-//		return m_path;
+//		return m_path[_bot];
 //	}
 //	else
 //	{
-//		//m_path.push(Vector2D(0.0f, 0.0f));
-//		return m_path;
+//		//m_path[_bot].push(Vector2D(0.0f, 0.0f));
+//		return m_path[_bot];
 //	}
 //}
 
@@ -549,6 +709,21 @@ void Graph::DrawLists()
 }
 
 
+
+bool Graph::IsPathReady(int _bot)
+{
+	return m_pathReady[_bot];
+}
+
+std::stack<Vector2D> Graph::GetPath(int _bot)
+{
+	// Safety
+	if (m_pathReady[_bot])
+	{
+		m_pathReady[_bot] = false;
+		return m_path[_bot];
+	}
+}
 
 Node* Graph::FindLowestFScoreNode(std::vector<Node*> _set)
 {

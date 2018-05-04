@@ -399,7 +399,7 @@ void Bot::StartAI()
 // Eventually, this will contain very little code - it just runs the state
 void Bot::ProcessAI()
 {
-
+	//m_myPathFinder.Initialise(Graph::GetInstance());
 	// DEBUGGING UPDATE TIME
 	auto t_start = std::chrono::high_resolution_clock::now();
 
@@ -412,10 +412,12 @@ void Bot::ProcessAI()
 		m_currentState->Update(this);
 		//m_behaviour->update(this);
 		//m_Acceleration += m_behaviour->FollowPath();
+		m_behaviour->Update();
 
 	}
 	else
 		ChangeState(nullptr);
+
 
 	//if (m_Velocity.magnitude() > MAXBOTSPEED)
 	//{
@@ -502,6 +504,8 @@ void Bot::DrawStats()
 		pTheRenderer->DrawTextAt(Vector2D(10.0f, 80.0f + (m_iOwnBotNumber * 100)), L"BOT DEAD!!!");
 	}
 
+	// ON BOT
+	MyDrawEngine::GetInstance()->WriteInt(m_Position + Vector2D(0.0f, 50.0f), m_iOwnBotNumber, MyDrawEngine::WHITE);
 
 	// RIGHT SIDE~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 	if (IsAlive())

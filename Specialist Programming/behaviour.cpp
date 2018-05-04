@@ -1,5 +1,6 @@
 #include "behaviour.h"
 #include "Renderer.h"
+#include "navMesh.h"
 #include "mydrawengine.h"
 
 behaviour::behaviour() : m_owner(nullptr), m_botToShoot(nullptr)//, m_currentState(nullptr), m_previousState(nullptr)
@@ -16,10 +17,18 @@ void behaviour::Initialise(Bot * _owner)
 void behaviour::SetOwner(Bot * _owner)
 {
 	m_owner = _owner;
+	m_ownerID = m_owner->GetBotID();
 }
 
 void behaviour::Update()
 {
+	//if(m_pathThread->)
+	if (Graph::GetInstance()->IsPathReady(m_ownerID))
+	{
+		//m_isFollowingPath = true;
+		m_path = Graph::GetInstance()->GetPath(m_ownerID);
+	}
+
 }
 
 bool behaviour::IsTargetAlive()
@@ -264,8 +273,18 @@ Vector2D behaviour::AccumilateBehaviours(const Vector2D& _currentPosition, const
 void behaviour::SetPath(Vector2D _goal, Vector2D _currentLocation)
 {
 	Vector2D l_start = _currentLocation;
-	std::stack<Vector2D> l_path = Graph::GetInstance()->PathFind(l_start,
-		_goal);
+	std::stack<Vector2D> l_path;
+	if (USE_THREADS)
+	{
+		//l_path.push(Graph::GetInstance()->GetClosestNode(_currentLocation)->m_position);
+		Graph::GetInstance()->StartThreadedPathFind(l_start, _goal, m_ownerID, m_pathThread);
+	}
+	else
+	{
+		l_path = Graph::GetInstance()->PathFind(l_start,
+			_goal, m_owner->GetBotID());
+
+	}
 	m_path.swap(l_path);
 
 	m_currentPathTarget = _goal;
@@ -299,60 +318,20 @@ Vector2D behaviour::FollowPath(const Vector2D& _currentPosition, const Vector2D&
 
 			if (t_arriveCircle.Intersects((Point2D)t_nextNodeInPath))
 			{
-				m_path.pop();
+				if (m_ownerID == 0)
+					m_path.pop();
+				else
+					m_path.pop();
 				//m_path.top();
 			}
 		}
+		return Seek(_currentPosition, _currentVelocity, t_nextNodeInPath);
+	}
+	else
+	{
+		return Seek(_currentPosition, _currentVelocity, m_currentPathTarget);
 	}
 
-	return Seek(_currentPosition, _currentVelocity, t_nextNodeInPath);
-
-
-	//if (!StaticMap::GetInstance()->IsLineOfSight(m_owner->m_Position, m_path.top()))
-	//{
-	//	MoveTo(m_startTarget);
-	//}
-
-	//// Follow path, if end of path then arrive
-	//if (!CanSeePathToTargetLocation())
-	//{
-	//	m_owner->m_Acceleration = behaviour::Seek(m_owner->m_Position, m_owner->m_Velocity, m_path.top());
-	//}
-	//else
-	//{
-	//	m_owner->m_Acceleration = behaviour::Arrive(m_owner->m_Position, m_owner->m_Velocity, m_startTarget);
-	//}
-
-	//// If next node in path can be seen, pop top of the stack and follow next path but 
-	////  only if more then 1 positions. If only one position, stop when close to target
-	//if (m_path.size() > 1)
-	//{
-	//	Vector2D top = m_path.top();
-	//	m_path.pop();
-	//	Vector2D nextLocation = m_path.top();
-	//	m_path.push(top);
-	//	if (StaticMap::GetInstance()->IsLineOfSight(m_owner->m_Position, nextLocation))
-	//	{
-	//		m_path.pop();
-	//	}
-	//}
-	//else if ((m_startTarget - m_owner->m_Position).magnitude() < 20.0f)
-	//{
-	//	m_isFollowingPath = false;
-	//	StopMoving();
-	//}
 
 }
 
-//void behaviour::PathSmoothing()
-//{
-//	// Returns true or false if it can see the next node in a path
-//	if (!m_path.empty())
-//	{
-//		if (StaticMap::GetInstance()->IsLineOfSight(m_bot->GetLocation(), m_path.top()))
-//		{
-//			m_currentPathTarget = m_path.top();
-//			m_path.pop();
-//		}
-//	}
-//}
