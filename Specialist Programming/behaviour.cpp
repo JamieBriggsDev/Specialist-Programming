@@ -3,9 +3,13 @@
 #include "navMesh.h"
 #include "mydrawengine.h"
 
-behaviour::behaviour() : m_owner(nullptr), m_botToShoot(nullptr)//, m_currentState(nullptr), m_previousState(nullptr)
+
+/// <summary>
+/// </summary>
+behaviour::behaviour() : m_owner(nullptr), m_botToShoot(nullptr), m_pathThread(nullptr)//, m_currentState(nullptr), m_previousState(nullptr)
 {
 	SetBehaviours(false, false, false, false, false, true, true);
+	//m_pathThread = nullptr;
 }
 
 void behaviour::Initialise(Bot * _owner)
@@ -26,6 +30,12 @@ void behaviour::Update()
 	if (Graph::GetInstance()->IsPathReady(m_ownerID))
 	{
 		//m_isFollowingPath = true;
+		if (m_pathThread != nullptr)
+		{
+			m_pathThread->join();
+		}
+		//if (m_pathThread != nullptr)
+		//	delete m_pathThread;
 		m_path = Graph::GetInstance()->GetPath(m_ownerID);
 	}
 
@@ -103,7 +113,7 @@ Vector2D behaviour::AvoidWall(const Vector2D& _currentPosition, const Vector2D& 
 	Circle2D t_smallCollisionCircle(_currentPosition + t_projection, 30.0f);
 	Circle2D t_bigCollisionCircle(_currentPosition + t_projection, 50.0f);
 
-	MyDrawEngine::GetInstance()->DrawLine(_currentPosition, _currentPosition + t_projection, MyDrawEngine::RED);
+	//MyDrawEngine::GetInstance()->DrawLine(_currentPosition, _currentPosition + t_projection, MyDrawEngine::RED);
 
 
 	// Vector2D for velocity

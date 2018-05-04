@@ -6,13 +6,13 @@
 #include "rules.h"
 
 #define add(x) push_back(x)
+#define THREADLOCK (g_mutex.lock())
+#define THREADUNLOCK (g_mutex.unlock())
 
 Graph* Graph::m_instance = nullptr;
 
 std::mutex g_mutex;
 
-#define THREADLOCK g_mutex.lock()
-#define THREADUNLOCK g_mutex.unlock()
 
 
 void Graph::AddNode(Vector2D _location)
@@ -374,6 +374,8 @@ std::stack<Vector2D> Graph::PathFind(const Vector2D _from, const Vector2D _to, c
 
 void Graph::StartThreadedPathFind(const Vector2D _from, const Vector2D _to, const int _bot, std::thread * _thread)
 {
+
+
 	_thread = new std::thread(&Graph::ThreadedPathFind, this, _from, _to, _bot);
 }
 

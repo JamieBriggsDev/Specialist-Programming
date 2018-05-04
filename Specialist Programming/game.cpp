@@ -6,6 +6,7 @@
 #include "errorlogger.h"
 #include "myinputs.h"
 #include "dynamicobjects.h"
+#include "Network.h"
 
 
 Game* Game::pInst = NULL;
@@ -122,6 +123,38 @@ ErrorType Game::Update()
 	// Update Dynamic objects
 	{
 		DynamicObjects::GetInstance()->Update(m_timer.m_fFrameTime);
+
+
+		if (Network::GetInstance()->m_isHost)
+		{
+			MyInputs* l_Input = MyInputs::GetInstance();
+			l_Input->SampleKeyboard();
+			// Connect to client when num 9 is pressed
+			if (l_Input->KeyPressed(DIK_NUMPAD9))
+			{
+				Network::Release();
+				Network::GetInstance()->m_isHost = false;
+				if (!Network::GetInstance()->ConnectToServer())
+				{
+					// if cant connect, clean up and become host
+					Network::GetInstance()->Release();
+					Network::GetInstance()->SetupServer();
+				}
+			}
+			else
+			{
+
+				Network::GetInstance()->CheckNewClients();
+				//Network::GetInstance()->Send();
+			}
+		}
+
+		if (Network::GetInstance()->m_isActive &&
+			!Network::GetInstance()->m_isHost)
+		{
+			pTheRenderer->DrawNumberAt(Vector2D(0.0f, 0.0f), Network::GetInstance()->m_dataRecieved);
+		}
+
 
 		// DEBUG
 		if (MyInputs::GetInstance()->KeyPressed(DIK_NUMPAD0))

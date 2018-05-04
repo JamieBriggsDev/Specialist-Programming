@@ -23,6 +23,7 @@
 #include "errortype.h"
 #include "gamecode.h"
 #include "errorlogger.h"
+#include "Network.h"
 
 
 // Includes *************************************************************************************
@@ -189,6 +190,7 @@ int WINAPI WinMain(HINSTANCE hInstance,			// A number that registers the instanc
 
 			if (KEYPRESSED(VK_ESCAPE))
 			{
+				Network::GetInstance()->Release();
 				PostMessage(gHwnd,WM_CLOSE,0,0);		// Send message to quit window on next (?) loop
 				WindowClosed=true;						// Make a note that window is on the way out
 			}
