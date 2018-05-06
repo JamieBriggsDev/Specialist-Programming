@@ -32,38 +32,38 @@ Network::Network()
 
 wchar_t * Network::GetLocalIP()
 {
-	string line;
-	ifstream IPFile;
-	int offset;
-	char* search0 = "IPv4 Address. . . . . . . . . . . :";      // search pattern
+	//string line;
+	//ifstream IPFile;
+	//int offset;
+	//char* search0 = "IPv4 Address. . . . . . . . . . . :";      // search pattern
 
-	system("ipconfig > ip.txt");
+	//system("ipconfig > ip.txt");
 
-	IPFile.open("ip.txt");
-	if (IPFile.is_open())
-	{
-		while (!IPFile.eof())
-		{
-			getline(IPFile, line);
-			if ((offset = line.find(search0, 0)) != string::npos)
-			{
-				//   IPv4 Address. . . . . . . . . . . : 1
-				//1234567890123456789012345678901234567890     
-				line.erase(0, 39);
-				cout << line << endl;
-				IPFile.close();
-			}
-		}
-	}
-	//wstring = to_wstring(line);
+	//IPFile.open("ip.txt");
+	//if (IPFile.is_open())
+	//{
+	//	while (!IPFile.eof())
+	//	{
+	//		getline(IPFile, line);
+	//		if ((offset = line.find(search0, 0)) != string::npos)
+	//		{
+	//			//   IPv4 Address. . . . . . . . . . . : 1
+	//			//1234567890123456789012345678901234567890     
+	//			line.erase(0, 39);
+	//			cout << line << endl;
+	//			IPFile.close();
+	//		}
+	//	}
+	//}
+	////wstring = to_wstring(line);
 
-	std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
-	//std::string narrow = converter.to_bytes(wide_utf16_source_string);
-	std::wstring wide = converter.from_bytes(line);
+	//std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
+	////std::string narrow = converter.to_bytes(wide_utf16_source_string);
+	//std::wstring wide = converter.from_bytes(line);
 
 
-	wchar_t* l_output = wide.c_str;
-	return l_output;
+	//wchar_t* l_output = wide.c_str;
+	//return l_output;
 }
 
 void Network::CloseConnection()
@@ -104,7 +104,7 @@ bool Network::SetupServer()
 {
 	bool l_error = true;
 
-	m_MyIP = GetLocalIP();
+	//m_MyIP = GetLocalIP();
 
 	// Setup windows socket
 	WSASetup();
