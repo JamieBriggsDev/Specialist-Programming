@@ -1,6 +1,8 @@
 #include "dynamicobjects.h"
 #include "renderer.h"
 #include "errorlogger.h"
+#include "Network.h"
+
 #define NULL 0
 
 DynamicObjects::DynamicObjects()
@@ -66,8 +68,53 @@ void DynamicObjects::Release()		// Static
 	}
 }
 
+#define NetSpecificBot(i, j) l_data.m_team[i].m_bots[j]
+#define SpecificBot(i, j) m_rgTeams[i].m_rgBots[j]
+
 ErrorType DynamicObjects::Update(float frametime)
 {
+	if (!Network::GetInstance()->m_isHost)
+	{
+		if (Network::GetInstance()->Recieve())
+		{
+			// Used by network if needed
+			Network::SendData l_data = Network::GetInstance()->m_data;
+			// Set new score if changed to stop flickering
+			if(l_data.m_team[0].m_teamScore > m_rgTeams[0].m_iScore)
+				m_rgTeams[0].m_iScore = l_data.m_team[0].m_teamScore;
+			if (l_data.m_team[1].m_teamScore > m_rgTeams[1].m_iScore)
+				m_rgTeams[1].m_iScore = l_data.m_team[1].m_teamScore;
+			// Go through bot teams
+			for (int i = 0; i < NUMTEAMS; i++)
+			{
+				// Go through bots
+				for (int j = 0; j < NUMBOTSPERTEAM; j++)
+				{
+					// Bot Data
+					//Set Position
+					SpecificBot(i, j).SetPosition(NetSpecificBot(i, j).m_posX,
+						NetSpecificBot(i, j).m_posY);
+					//Set Velocity
+					SpecificBot(i, j).SetVelocity(NetSpecificBot(i, j).m_velX,
+						NetSpecificBot(i, j).m_velY);
+					//Set Directopm
+					SpecificBot(i, j).SetDirection(NetSpecificBot(i, j).m_dir);
+					//Set is alive
+					SpecificBot(i, j).SetAlive(NetSpecificBot(i, j).m_isAlive);
+
+					// Shoot Data
+					SpecificBot(i, j).SetShootData(l_data.m_team[i].m_shootData[j].m_targetTeam,
+						l_data.m_team[i].m_shootData[j].m_botNumber,
+						l_data.m_team[i].m_shootData[j].m_damage,
+						l_data.m_team[i].m_shootData[j].m_isFiring);
+
+				}
+			// Set position data
+			}
+		}
+	}
+
+
 	// Update all bots
 	for(int i=0;i<NUMTEAMS;i++)
 	{

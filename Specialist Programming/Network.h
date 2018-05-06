@@ -2,18 +2,18 @@
 
 #include <Windows.h>
 #include <process.h>
-
 #include <vector>
-
 #include <stdint.h>
+#include "rules.h"
+
 
 
 
 class DynamicObjects;
-#include "game.h"
+//#include "game.h"
 
-#define PORT (560)
-#define IP ("172.16.1.33")
+#define PORT (8645)
+#define IP ("172.16.1.35")
 
 
 
@@ -35,7 +35,7 @@ private:
 	WSADATA m_wsaData;
 	// Is connected
 
-	GameTimer m_timer;
+	//GameTimer m_timer;
 
 	// Data which needs to be passed through
 	// Used to see if data gets sent accross the network
@@ -43,6 +43,7 @@ private:
 	{
 		double m_dataSent;
 	};
+
 	// Closes the connections
 	void CloseConnection();
 	// Tells clients to finish up
@@ -50,12 +51,44 @@ private:
 	// Start up windows sockets
 	bool WSASetup();
 public:
+	struct BotData
+	{
+		double m_posX;
+		double m_posY;
+		double m_velX;
+		double m_velY;
+		double m_dir;
+		bool m_isAlive;
+	};
+
+	struct ShootData
+	{
+		int m_targetTeam;
+		int m_botNumber;
+		int m_damage;
+		bool m_isFiring;
+	};
+
+	struct TeamData
+	{
+		int m_teamScore;
+		ShootData m_shootData[NUMBOTSPERTEAM];
+		BotData m_bots[NUMBOTSPERTEAM];
+	};
+
+	struct SendData
+	{
+		TeamData m_team[NUMTEAMS];
+	};
 	// Singleton stuff
 	// Create
 	static Network* GetInstance()
 	{
 		if (!m_pInst)
+		{
 			m_pInst = new Network;
+			m_isActive = true;
+		}
 
 		return m_pInst;
 	}
@@ -72,6 +105,8 @@ public:
 		}
 	}
 	//NetData m_frameData;
+	// Data to be sent
+	SendData m_data;
 	// States if the program is connected
 	bool m_isHost;
 	// Non blocking flag
@@ -95,14 +130,15 @@ public:
 	void SaveClents(sockaddr_in _address);
 
 	// Sends data to every client saved
-	void Send();
+	void Send(SendData _data);
 
 	// CLIENT STUFF
 	// Connects to a server
 	bool ConnectToServer();
 	// Collect any data sent from the host
-	void Recieve();
-
+	bool Recieve();
+	// Returns how many clients there are
+	int GetNumberOfClients() { return m_clients.size(); }
 
 
 };

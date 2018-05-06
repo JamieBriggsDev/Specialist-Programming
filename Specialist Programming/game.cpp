@@ -9,6 +9,9 @@
 #include "Network.h"
 
 
+#define NetSpecificBot(i, j) l_data.m_team[i].m_bots[j]
+#define SpecificBot(i, j) GetBot(i, j)
+
 Game* Game::pInst = NULL;
 
 Game* Game::GetInstance()
@@ -35,6 +38,7 @@ void Game::Release()		// Static
 Game::Game()
 {
 	InitialiseScript();
+	Network::GetInstance()->SetupServer();
 }
 
 Game::~Game()
@@ -118,6 +122,9 @@ ErrorType Game::Update()
 
 	Renderer* pTheRenderer = Renderer::GetInstance();
 
+	// Used by network if needed
+	Network::SendData l_data;
+
 	// If not paused or minimised
 	if(m_State == RUNNING)
 	// Update Dynamic objects
@@ -145,14 +152,55 @@ ErrorType Game::Update()
 			{
 
 				Network::GetInstance()->CheckNewClients();
-				//Network::GetInstance()->Send();
+				// pack data here to get sent if theres at least one client
+				if (Network::GetInstance()->GetNumberOfClients() > 0)
+				{
+					// Team Score
+					l_data.m_team[0].m_teamScore = DynamicObjects::GetInstance()->GetScore(0);
+					l_data.m_team[1].m_teamScore = DynamicObjects::GetInstance()->GetScore(1);
+					// loop through both teams
+					for (int i = 0; i < NUMTEAMS; i++)
+					{
+						// loop through bots in a team
+						for (int j = 0; j < NUMBOTSPERTEAM; j++)
+						{
+
+
+							//Position data
+							NetSpecificBot(i, j).m_posX = (double)DynamicObjects::GetInstance()->
+								SpecificBot(i, j).GetLocation().XValue;
+							NetSpecificBot(i, j).m_posY = (double)DynamicObjects::GetInstance()->
+								SpecificBot(i, j).GetLocation().YValue;
+							//Velocity data
+							NetSpecificBot(i, j).m_velX = (double)DynamicObjects::GetInstance()->
+								SpecificBot(i, j).GetVelocity().XValue;
+							NetSpecificBot(i, j).m_velY = (double)DynamicObjects::GetInstance()->
+								SpecificBot(i, j).GetVelocity().YValue;
+							//Rotation
+							NetSpecificBot(i, j).m_dir = (double)DynamicObjects::GetInstance()->
+								SpecificBot(i, j).GetLocation().YValue;
+							// Is Alive
+							NetSpecificBot(i, j).m_isAlive = DynamicObjects::GetInstance()->
+								SpecificBot(i, j).IsAlive();
+							// Shoot data
+							l_data.m_team[i].m_shootData[j].m_targetTeam = DynamicObjects::GetInstance()->SpecificBot(i, j).GetTargetTeam();
+							l_data.m_team[i].m_shootData[j].m_botNumber = DynamicObjects::GetInstance()->SpecificBot(i, j).GetTargetBot();
+							l_data.m_team[i].m_shootData[j].m_damage = DynamicObjects::GetInstance()->SpecificBot(i, j).GetDamage();
+							l_data.m_team[i].m_shootData[j].m_isFiring = DynamicObjects::GetInstance()->SpecificBot(i, j).GetIsFiring();
+
+						}
+					}
+				}
+				// End of packing
+
 			}
 		}
 
 		if (Network::GetInstance()->m_isActive &&
 			!Network::GetInstance()->m_isHost)
 		{
-			pTheRenderer->DrawNumberAt(Vector2D(0.0f, 0.0f), Network::GetInstance()->m_dataRecieved);
+			Network::GetInstance()->Recieve();
+			//pTheRenderer->DrawNumberAt(Vector2D(0.0f, 0.0f), Network::GetInstance()->m_dataRecieved);
 		}
 
 
@@ -222,6 +270,12 @@ ErrorType Game::Update()
 	{
 		ErrorLogger::Writeln(L"Interface reports failure.");
 		// Non-critical error
+	}
+
+	if (Network::GetInstance()->m_isHost)
+	{
+		if (Network::GetInstance()->GetNumberOfClients() > 0)
+			Network::GetInstance()->Send(l_data);
 	}
 
 	return answer;

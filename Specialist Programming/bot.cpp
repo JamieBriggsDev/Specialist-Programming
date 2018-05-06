@@ -9,6 +9,7 @@
 #include "mydrawengine.h"
 #include "navMesh.h"
 #include "AllStates.h"
+#include "Network.h"
 
 			
 bool Bot::m_DrawPath = false;
@@ -26,10 +27,14 @@ float Bot::GetDistance(Vector2D _first, Vector2D _second)
 
 void Bot::Update(float frametime)
 {
-	if(m_iOwnTeamNumber==0)
-		ProcessAI();
-	else
-		ProcessAIBadly();
+	if (Network::GetInstance()->m_isHost)
+	{
+		if (m_iOwnTeamNumber == 0)
+			ProcessAI();
+		else
+			ProcessAIBadly();
+
+	}
 
 	// Check for respawn
 	if(this->m_dTimeToRespawn>0)
@@ -39,7 +44,7 @@ void Bot::Update(float frametime)
 		if(m_dTimeToRespawn<=0)
 		{
 			PlaceAt(StaticMap::GetInstance()->GetSpawnPoint(m_iOwnTeamNumber));
-      Reload();
+			Reload();
 		}
 	}
 	else
@@ -159,25 +164,25 @@ void Bot::Update(float frametime)
 						m_bFiring = false;
             m_iAmmo--;
 						m_dTimeToCoolDown = TIMEBETWEENSHOTS;
-						int damage=0;
+						m_iShootDamage =0;
 
-						while(damage<100 && (rand()%1000) < int(m_dAccuracy*1000))
+						while(m_iShootDamage<100 && (rand()%1000) < int(m_dAccuracy*1000))
 						{
-							damage+=20;
+							m_iShootDamage +=20;
 						}
 
-						targetBot.TakeDamage(damage);
+						targetBot.TakeDamage(m_iShootDamage);
 
 						m_dAccuracy/=2.0;
 
 						Vector2D tgt = targetBot.m_Position;
-						if(damage==0)	// you missed
+						if(m_iShootDamage ==0)	// you missed
 						{
 							// Make it look like a miss
 							tgt+=Vector2D(rand()%30-15.0f, rand()%30-15.0f);
 						}
 						Renderer::GetInstance()->AddShot(m_Position, tgt);
-						Renderer::GetInstance()->AddBloodSpray(targetBot.m_Position, targetBot.m_Position-m_Position, damage/5);
+						Renderer::GetInstance()->AddBloodSpray(targetBot.m_Position, targetBot.m_Position-m_Position, m_iShootDamage /5);
 					}
 
 				}
@@ -518,6 +523,37 @@ void Bot::DrawStats()
 	}
 }
 
+void Bot::SetPosition(float _x, float _y)
+{
+	m_Position = Vector2D(_x, _y);
+}
+
+void Bot::SetVelocity(float _x, float _y)
+{
+	m_Velocity = Vector2D(_x, _y);
+}
+
+void Bot::SetDirection(float _r)
+{
+	m_dDirection = _r;
+}
+
+void Bot::SetAlive(bool _alive)
+{
+	if (_alive)
+		m_dTimeToRespawn = 0.0f;
+	else
+		m_dTimeToRespawn = 1.0f;
+}
+
+void Bot::SetShootData(int _team, int _bot, int _damage, bool _isShooting)
+{
+	m_iAimingAtTeam = _team;
+	m_iAimingAtBot = _bot;
+	m_iShootDamage = _damage;
+	m_bFiring = _isShooting;
+	
+}
 
 void Bot::ProcessAIBadly()
 {

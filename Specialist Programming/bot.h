@@ -36,6 +36,7 @@ protected:
 	int m_iOwnBotNumber;
 	float m_dAccuracy;				// Accuracy of the current firing solution (1==100%)
 	int m_iHealth;					// Health (up to 100)
+	float m_iShootDamage;
 
 	//Graph m_myGraph;
 	//std::vector<Vector2D> m_currentPath;
@@ -44,6 +45,7 @@ protected:
 	bool m_bSeekOn;
 	bool m_bHideOn;
 	bool m_bAvoidWallsOn;
+
 
 	Circle2D m_feeler;
 
@@ -172,4 +174,16 @@ public:
 	void DrawPaths();
 	static bool m_DrawStats;
 	void DrawStats();
+
+
+
+	// Networking stuff
+	void SetPosition(float _x, float _y);
+	void SetVelocity(float _x, float _y);
+	void SetDirection(float _r);
+	void SetAlive(bool _alive);
+	void SetShootData(int _team, int _bot, int _damage, bool _isShooting);
+
+	int GetDamage() { return m_iShootDamage; };
+	bool GetIsFiring() { return m_bFiring; }
 };
