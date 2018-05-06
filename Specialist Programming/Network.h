@@ -13,7 +13,8 @@ class DynamicObjects;
 //#include "game.h"
 
 #define PORT (8645)
-#define IP ("172.16.1.35")
+#define IP ("192.168.0.36")
+//#define IP ("172.16.1.35")
 
 
 
