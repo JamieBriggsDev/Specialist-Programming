@@ -150,7 +150,8 @@ ErrorType Game::Update()
 			}
 			else
 			{
-
+				// Display Local IP
+				pTheRenderer->DrawTextAt(Vector2D(1000.0f, 0.0f), Network::GetInstance()->m_MyIP);
 				Network::GetInstance()->CheckNewClients();
 				// pack data here to get sent if theres at least one client
 				if (Network::GetInstance()->GetNumberOfClients() > 0)

@@ -34,7 +34,7 @@ private:
 	// Socket data for windows
 	WSADATA m_wsaData;
 	// Is connected
-
+	wchar_t* GetLocalIP();
 	//GameTimer m_timer;
 
 	// Data which needs to be passed through
@@ -140,6 +140,6 @@ public:
 	// Returns how many clients there are
 	int GetNumberOfClients() { return m_clients.size(); }
 
-
+	wchar_t* m_MyIP;
 };
 
