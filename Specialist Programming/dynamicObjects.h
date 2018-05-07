@@ -2,8 +2,9 @@
 #include "errortype.h"
 #include "bot.h"
 #include "navMesh.h"
+#include "Network.h"
 
-const int MAXTEAMS = 4;
+const int MAXTEAMS = 2;
 const int MAXBOTSPERTEAM = 16;
 const int MAXDOMINATIONPOINTS=16;
 
@@ -85,4 +86,6 @@ public:
 	{
 		return m_graph;
 	}
+
+	Network::SendData m_data;
 };

@@ -13,7 +13,7 @@ class DynamicObjects;
 //#include "game.h"
 
 #define PORT (8645)
-#define IP ("192.168.0.36")
+ #define IP ("172.16.1.37")
 //#define IP ("172.16.1.35")
 
 
@@ -60,6 +60,9 @@ public:
 		double m_velY;
 		double m_dir;
 		bool m_isAlive;
+		bool m_isAiming;
+		double m_shootCooldown;
+		int m_ammo;
 	};
 
 	struct ShootData
@@ -142,5 +145,8 @@ public:
 	int GetNumberOfClients() { return m_clients.size(); }
 
 	wchar_t* m_MyIP;
+
+
+	const char* m_hostIP = "172.16.1.37";
 };
 

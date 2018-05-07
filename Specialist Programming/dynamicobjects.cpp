@@ -1,7 +1,7 @@
 #include "dynamicobjects.h"
 #include "renderer.h"
 #include "errorlogger.h"
-#include "Network.h"
+
 
 #define NULL 0
 
@@ -18,8 +18,6 @@ DynamicObjects::DynamicObjects()
 		}
 	}
 
-
-
 }
 
 void DynamicObjects::Initialise()
@@ -28,7 +26,7 @@ void DynamicObjects::Initialise()
 	m_dNextScorePoint=0.0;
 
 	//Create graph
-	m_graph.AnalyseMap();
+	//m_graph.AnalyseMap();
 
 	for(int i=0;i<NUMTEAMS;i++)
 	{
@@ -68,7 +66,7 @@ void DynamicObjects::Release()		// Static
 	}
 }
 
-#define NetSpecificBot(i, j) l_data.m_team[i].m_bots[j]
+#define NetSpecificBot(i, j) m_data.m_team[i].m_bots[j]
 #define SpecificBot(i, j) m_rgTeams[i].m_rgBots[j]
 
 ErrorType DynamicObjects::Update(float frametime)
@@ -78,12 +76,12 @@ ErrorType DynamicObjects::Update(float frametime)
 		if (Network::GetInstance()->Recieve())
 		{
 			// Used by network if needed
-			Network::SendData l_data = Network::GetInstance()->m_data;
+			m_data = Network::GetInstance()->m_data;
 			// Set new score if changed to stop flickering
-			if(l_data.m_team[0].m_teamScore > m_rgTeams[0].m_iScore)
-				m_rgTeams[0].m_iScore = l_data.m_team[0].m_teamScore;
-			if (l_data.m_team[1].m_teamScore > m_rgTeams[1].m_iScore)
-				m_rgTeams[1].m_iScore = l_data.m_team[1].m_teamScore;
+			if(m_data.m_team[0].m_teamScore > m_rgTeams[0].m_iScore)
+				m_rgTeams[0].m_iScore = m_data.m_team[0].m_teamScore;
+			if (m_data.m_team[1].m_teamScore > m_rgTeams[1].m_iScore)
+				m_rgTeams[1].m_iScore = m_data.m_team[1].m_teamScore;
 			// Go through bot teams
 			for (int i = 0; i < NUMTEAMS; i++)
 			{
@@ -101,12 +99,18 @@ ErrorType DynamicObjects::Update(float frametime)
 					SpecificBot(i, j).SetDirection(NetSpecificBot(i, j).m_dir);
 					//Set is alive
 					SpecificBot(i, j).SetAlive(NetSpecificBot(i, j).m_isAlive);
-
-					// Shoot Data
-					SpecificBot(i, j).SetShootData(l_data.m_team[i].m_shootData[j].m_targetTeam,
-						l_data.m_team[i].m_shootData[j].m_botNumber,
-						l_data.m_team[i].m_shootData[j].m_damage,
-						l_data.m_team[i].m_shootData[j].m_isFiring);
+					//Shoot Data
+					//Set Ammo
+					SpecificBot(i, j).SetAmmo(NetSpecificBot(i, j).m_ammo);
+					SpecificBot(i, j).SetShootData(m_data.m_team[i].m_shootData[j].m_targetTeam,
+						m_data.m_team[i].m_shootData[j].m_botNumber,
+						m_data.m_team[i].m_shootData[j].m_damage,
+						m_data.m_team[i].m_shootData[j].m_isFiring);
+					SpecificBot(i, j).SetIsAiming(NetSpecificBot(i, j).m_isAiming);
+					bool check = m_data.m_team[i].m_shootData[j].m_isFiring;
+					SpecificBot(i, j).SetTimeToCoolDown((float)NetSpecificBot(i, j).m_shootCooldown);
+					
+					//m_data.m_team[i].m_shootData[j].m_isFiring = m_data.m_team[i].m_shootData[j].m_isFiring;
 
 				}
 			// Set position data
@@ -207,7 +211,7 @@ ErrorType DynamicObjects::Render()
 	ErrorType answer = SUCCESS;
 
 	Renderer* pRenderer = Renderer::GetInstance();
-
+	//pRenderer->DrawFX();
 	// Draw each Bot
 	for(int i=0;i<NUMTEAMS;i++)
 	{

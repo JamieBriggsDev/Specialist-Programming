@@ -10,7 +10,7 @@
 
 
 #define NetSpecificBot(i, j) l_data.m_team[i].m_bots[j]
-#define SpecificBot(i, j) GetBot(i, j)
+#define SpecificBot(i, j) DynamicObjects::GetInstance()->GetBot(i, j)
 
 Game* Game::pInst = NULL;
 
@@ -51,7 +51,7 @@ ErrorType Game::Start()
 
 	m_timer.mark();
 	m_timer.mark();
-	m_State = RUNNING;
+	m_State = MAIN;
 
 	return SUCCESS;
 }
@@ -125,20 +125,49 @@ ErrorType Game::Update()
 	// Used by network if needed
 	Network::SendData l_data;
 
+	bool isHost = false;
+	bool isConnecting = false;
+	bool isClientOption = false;
+
+	if (m_State == MAIN)
+	{
+
+		pTheRenderer->DrawTextAt(Vector2D(250.0f, 400.0f), L"1: Host");
+
+		pTheRenderer->DrawTextAt(Vector2D(250.0f, 450.0f), L"2: Connect To ");
+
+		const size_t ipSize = strlen(Network::GetInstance()->m_hostIP) + 1;
+		wchar_t *ip = new wchar_t[ipSize];
+		mbstowcs(ip, Network::GetInstance()->m_hostIP, ipSize);
+
+		pTheRenderer->DrawTextAt(Vector2D(450.0f, 450.0f), ip);
+
+
+		MyInputs* l_Input = MyInputs::GetInstance();
+		l_Input->SampleKeyboard();
+
+		if (l_Input->KeyPressed(DIK_1))
+		{
+			isHost = true;
+			m_State = RUNNING;
+		}
+		else if (l_Input->KeyPressed(DIK_2))
+		{
+			isConnecting = true;
+			m_State = RUNNING;
+		}
+	}
+
 	// If not paused or minimised
 	if(m_State == RUNNING)
 	// Update Dynamic objects
 	{
-		DynamicObjects::GetInstance()->Update(m_timer.m_fFrameTime);
-
-
 		if (Network::GetInstance()->m_isHost)
 		{
-			MyInputs* l_Input = MyInputs::GetInstance();
-			l_Input->SampleKeyboard();
 			// Connect to client when num 9 is pressed
-			if (l_Input->KeyPressed(DIK_NUMPAD9))
+			if (isConnecting)
 			{
+				DynamicObjects::GetInstance()->m_data = Network::GetInstance()->m_data;
 				Network::Release();
 				Network::GetInstance()->m_isHost = false;
 				if (!Network::GetInstance()->ConnectToServer())
@@ -147,12 +176,19 @@ ErrorType Game::Update()
 					Network::GetInstance()->Release();
 					Network::GetInstance()->SetupServer();
 				}
+				else
+				{
+					isConnecting = false;
+				}
 			}
 			else
 			{
 				// Display Local IP
-				wchar_t* l_ip = const_cast<wchar_t*>(Network::GetInstance()->m_MyIP);
+				pTheRenderer->DrawTextAt(Vector2D(900.0f, 0.0f), L"HOST: ");
+				wchar_t* l_ip = Network::GetInstance()->m_MyIP;
 				pTheRenderer->DrawTextAt(Vector2D(1000.0f, 0.0f), l_ip);
+				pTheRenderer->DrawTextAt(Vector2D(850.0f, 20.0f), L"CLIENT COUNT: ");
+				pTheRenderer->DrawNumberAt(Vector2D(1000.0f, 20.0f), Network::GetInstance()->GetNumberOfClients());
 				Network::GetInstance()->CheckNewClients();
 				// pack data here to get sent if theres at least one client
 				if (Network::GetInstance()->GetNumberOfClients() > 0)
@@ -167,44 +203,53 @@ ErrorType Game::Update()
 						for (int j = 0; j < NUMBOTSPERTEAM; j++)
 						{
 
-
 							//Position data
-							NetSpecificBot(i, j).m_posX = (double)DynamicObjects::GetInstance()->
-								SpecificBot(i, j).GetLocation().XValue;
-							NetSpecificBot(i, j).m_posY = (double)DynamicObjects::GetInstance()->
-								SpecificBot(i, j).GetLocation().YValue;
+							NetSpecificBot(i, j).m_posX = 
+								(double)SpecificBot(i, j).GetLocation().XValue;
+							NetSpecificBot(i, j).m_posY = 
+								(double)SpecificBot(i, j).GetLocation().YValue;
 							//Velocity data
-							NetSpecificBot(i, j).m_velX = (double)DynamicObjects::GetInstance()->
-								SpecificBot(i, j).GetVelocity().XValue;
-							NetSpecificBot(i, j).m_velY = (double)DynamicObjects::GetInstance()->
-								SpecificBot(i, j).GetVelocity().YValue;
+							NetSpecificBot(i, j).m_velX = 
+								(double)SpecificBot(i, j).GetVelocity().XValue;
+							NetSpecificBot(i, j).m_velY = 
+								(double)SpecificBot(i, j).GetVelocity().YValue;
 							//Rotation
-							NetSpecificBot(i, j).m_dir = (double)DynamicObjects::GetInstance()->
-								SpecificBot(i, j).GetLocation().YValue;
+							NetSpecificBot(i, j).m_dir = 
+								(double)SpecificBot(i, j).GetLocation().YValue;
 							// Is Alive
-							NetSpecificBot(i, j).m_isAlive = DynamicObjects::GetInstance()->
-								SpecificBot(i, j).IsAlive();
+							NetSpecificBot(i, j).m_isAlive = SpecificBot(i, j).IsAlive();
 							// Shoot data
-							l_data.m_team[i].m_shootData[j].m_targetTeam = DynamicObjects::GetInstance()->SpecificBot(i, j).GetTargetTeam();
-							l_data.m_team[i].m_shootData[j].m_botNumber = DynamicObjects::GetInstance()->SpecificBot(i, j).GetTargetBot();
-							l_data.m_team[i].m_shootData[j].m_damage = DynamicObjects::GetInstance()->SpecificBot(i, j).GetDamage();
-							l_data.m_team[i].m_shootData[j].m_isFiring = DynamicObjects::GetInstance()->SpecificBot(i, j).GetIsFiring();
+							// Ammo
+							NetSpecificBot(i, j).m_ammo = SpecificBot(i, j).GetAmmo();
+							l_data.m_team[i].m_shootData[j].m_targetTeam = 
+								SpecificBot(i, j).GetTargetTeam();
+							l_data.m_team[i].m_shootData[j].m_botNumber = 
+								SpecificBot(i, j).GetTargetBot();
+							l_data.m_team[i].m_shootData[j].m_damage = 
+								SpecificBot(i, j).GetDamage();
 
+							bool temp = SpecificBot(i, j).GetIsFiring();
+							l_data.m_team[i].m_shootData[j].m_isFiring = temp;
+								
+							// Is aiming
+							NetSpecificBot(i, j).m_isAiming = SpecificBot(i, j).GetIsAiming();
+							// Is Shooting
+							NetSpecificBot(i, j).m_shootCooldown = (double)SpecificBot(i, j).GetTimeToCoolDown();
 						}
-					}
+					}				
+					Network::GetInstance()->Send(l_data);
 				}
 				// End of packing
 
 			}
 		}
-
-		if (Network::GetInstance()->m_isActive &&
-			!Network::GetInstance()->m_isHost)
+		else
 		{
-			Network::GetInstance()->Recieve();
-			//pTheRenderer->DrawNumberAt(Vector2D(0.0f, 0.0f), Network::GetInstance()->m_dataRecieved);
+			pTheRenderer->DrawTextAt(Vector2D(900.0f, 0.0f), L"CLIENT");
 		}
 
+		// Update after networking
+		DynamicObjects::GetInstance()->Update(m_timer.m_fFrameTime);
 
 		// DEBUG
 		if (MyInputs::GetInstance()->KeyPressed(DIK_NUMPAD0))
@@ -235,6 +280,14 @@ ErrorType Game::Update()
 
 
 	}
+	//if (Network::GetInstance()->m_isHost)
+	//{
+	//	//pTheRenderer->DrawTextAt(Vector2D(1000.0f, 200.0f), Network::GetInstance()->m_MyIP);
+	//	//Network::GetInstance()->m_MyIP = Network::G
+
+
+
+	//}
 
 	// Render
 	if(pTheRenderer->GetIsValid()==false)
@@ -274,15 +327,6 @@ ErrorType Game::Update()
 		// Non-critical error
 	}
 
-	if (Network::GetInstance()->m_isHost)
-	{
-		//pTheRenderer->DrawTextAt(Vector2D(1000.0f, 200.0f), Network::GetInstance()->m_MyIP);
-		//Network::GetInstance()->m_MyIP = Network::G
-		if (Network::GetInstance()->GetNumberOfClients() > 0)
-			Network::GetInstance()->Send(l_data);
-
-
-	}
 
 	return answer;
 }

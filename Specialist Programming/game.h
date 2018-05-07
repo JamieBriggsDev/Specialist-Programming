@@ -9,7 +9,7 @@ private:
 	Game();
 	~Game();						
 	Game(const Game& other);		// Disabled
-	enum GameState{RUNNING, PAUSED, MINIMISED};
+	enum GameState{MAIN, RUNNING, PAUSED, MINIMISED};
 	GameState m_State;
 	GameTimer m_timer;
 public:

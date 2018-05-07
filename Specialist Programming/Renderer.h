@@ -55,7 +55,7 @@ private:
 	int GetTeamColour(int teamNumber);
 
 public:
-
+	//void Shot SetRGShot();
 	static Renderer* GetInstance();				// Thread-safe singleton
 	static void Release();
 	void SetViewCentre(Vector2D centre);

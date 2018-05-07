@@ -56,8 +56,6 @@ protected:
 	State<class Bot>* m_previousState;
 	void ChangeState(State<Bot>* _state);
 
-	int GetAmmo() { return m_iAmmo; }
-
 private:
 
 
@@ -174,6 +172,7 @@ public:
 	void DrawPaths();
 	static bool m_DrawStats;
 	void DrawStats();
+	void ClientDrawStats();
 
 
 
@@ -182,8 +181,15 @@ public:
 	void SetVelocity(float _x, float _y);
 	void SetDirection(float _r);
 	void SetAlive(bool _alive);
+	void SetAmmo(int _ammo) { m_iAmmo = _ammo; }
+	void SetIsAiming(bool _aiming) { m_bAiming = _aiming; }
 	void SetShootData(int _team, int _bot, int _damage, bool _isShooting);
+	void SetTimeToCoolDown(float _time) { m_dTimeToCoolDown = _time; }
 
-	int GetDamage() { return m_iShootDamage; };
-	bool GetIsFiring() { return m_bFiring; }
+	bool m_netFiring = false;
+	int GetAmmo() { return m_iAmmo; }
+	int GetDamage() { return m_iShootDamage; }
+	bool GetIsFiring() { return m_netFiring; }
+	bool GetIsAiming() { return m_bAiming; }
+	float GetTimeToCoolDown() { return m_dTimeToCoolDown; }
 };

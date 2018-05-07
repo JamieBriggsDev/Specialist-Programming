@@ -8,7 +8,7 @@
 //#include "game.h"           // GameTimer
 #include <string>           // use of strings for debugging
 #include <WS2tcpip.h>       // inet_pton()
-#include <iostream>
+
 // For getting IP address
 #include <fstream>
 #include <locale>
@@ -50,24 +50,29 @@ wchar_t * Network::GetLocalIP()
 				//   IPv4 Address. . . . . . . . . . . : 1
 				//1234567890123456789012345678901234567890     
 				line.erase(0, 39);
-				cout << line << endl;
+				//cout << line << endl;
 				IPFile.close();
+
+				break;
 			}
 		}
 	}
-	//wstring = to_wstring(line);
 
-	//std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
-	////std::string narrow = converter.to_bytes(wide_utf16_source_string);
-	//std::wstring wide = converter.from_bytes(line);
-
-
-	wchar_t l_output[15];
-	for (int i = 0; i < line.length(); i++)
+	wchar_t l_temp[15];
+	for (int i = 0; i < 15; i++)
 	{
-		l_output[i] = line[i];
+		if (i < line.length())
+			l_temp[i] = line[i];
+		else
+			l_temp[i] = '\0';
 	}
-	wchar_t* output = l_output;
+
+	size_t l_outputLen = wcslen(l_temp);
+	wchar_t* l_output = new wchar_t[l_outputLen+1];
+	wcscpy(l_output, l_temp);
+	//m_MyIP = l_output;
+	//memset(m_MyIP, 10000, 10000);
+	//memcpy(m_MyIP, &l_output, sizeof(&l_output));
 	return l_output;
 }
 
@@ -109,6 +114,7 @@ bool Network::SetupServer()
 {
 	bool l_error = true;
 
+	if(m_MyIP == L"")
 	m_MyIP = GetLocalIP();
 
 	// Setup windows socket
@@ -117,7 +123,7 @@ bool Network::SetupServer()
 	// Create UDP
 	if ((m_socket = socket(PF_INET, SOCK_DGRAM, IPPROTO_UDP)) < 0)
 	{
-		cout << "Error with socket function!" << endl;
+		//cout << "Error with socket function!" << endl;
 		l_error = false;
 	}
 
@@ -163,7 +169,7 @@ void Network::CheckNewClients()
 	// If client connects, send connected message and proceed to add client
 	if (strcmp(l_buffer, l_connectMessage) == 0)
 	{
-		std::cout << "New Client!" << std::endl;
+		//std::cout << "New Client!" << std::endl;
 		SaveClents(l_clientAddress);
 		InitData l_dataToSend;
 		l_dataToSend.m_dataSent = 6.9;
@@ -171,7 +177,7 @@ void Network::CheckNewClients()
 		if (!sendto(m_socket, (char*)&l_dataToSend, sizeof(InitData), 0,
 			(struct sockaddr*) &l_clientAddress, sizeof(l_clientAddress)))
 		{
-			cout << "Failed to send initial data!" << endl;
+			//cout << "Failed to send initial data!" << endl;
 		}
 	}
 
@@ -188,17 +194,21 @@ void Network::SaveClents(sockaddr_in _address)
 
 void Network::Send(SendData _data)
 {
+	// Check for any exit code
+
+
 	// Send data to all clients
 	m_data = _data;
 	for (unsigned int i = 0; i < m_clients.size(); i++)
 	{
 
-		if (!sendto(m_socket, (char*)&m_data, sizeof(SendData), 0, (struct sockaddr*) &m_clients[i], sizeof(m_clients[i])))
+		if (sendto(m_socket, (char*)&m_data, sizeof(SendData), 0, (struct sockaddr*) &m_clients[i], sizeof(m_clients[i])) 
+			== SOCKET_ERROR)
 		{
-			cout << "Failed to send data" << endl;
 		}
 		/*ErrorLogger::Writeln(L"Error: sendto() - Send() - Wrong size - Exiting");*/
 	}
+
 }
 
 
@@ -288,7 +298,7 @@ bool Network::Recieve()
 	char exit[] = "exit";
 	if (strcmp(l_buffer, exit) == 0)
 	{
-		cout << "Exiting" << endl;
+		//cout << "Exiting" << endl;
 		return false;
 	}
 
@@ -339,7 +349,7 @@ bool Network::ConnectToServer()
 		(struct sockaddr*) &m_serverAddress, sizeof(m_serverAddress))
 		!= strlen(l_connect))
 	{
-		cout << "Could not make initial connection\n";
+		//cout << "Could not make initial connection\n";
 		m_isHost = true;
 		l_error = false;
 
@@ -373,7 +383,7 @@ bool Network::ConnectToServer()
 
 		ioctlsocket(m_socket, FIONBIO, &m_nonBlocking);
 
-		cout << "Receive Data failed\n";
+		//cout << "Receive Data failed\n";
 	}
 	else
 	{

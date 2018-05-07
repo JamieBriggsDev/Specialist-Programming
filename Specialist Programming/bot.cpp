@@ -33,8 +33,16 @@ void Bot::Update(float frametime)
 			ProcessAI();
 		else
 			ProcessAIBadly();
-
 	}
+	else
+	{
+		if (m_DrawStats)
+		{
+			ClientDrawStats();
+		}
+	}
+
+	
 
 	// Check for respawn
 	if(this->m_dTimeToRespawn>0)
@@ -322,6 +330,14 @@ void Bot::StopAiming()
 void Bot::Shoot()
 {
 	m_bFiring = true;
+	m_netFiring = true;
+	// Add bool here to network since it is used instantly
+	//if (Network::GetInstance()->m_isHost)
+	//{
+	//	
+		DynamicObjects::GetInstance()->
+			m_data.m_team[0].m_shootData[m_iOwnBotNumber].m_isFiring = m_bFiring;
+	//}
 }
 
 // Returns the number of the team of the bot being aimed at.
@@ -407,7 +423,7 @@ void Bot::ProcessAI()
 	//m_myPathFinder.Initialise(Graph::GetInstance());
 	// DEBUGGING UPDATE TIME
 	auto t_start = std::chrono::high_resolution_clock::now();
-
+	//m_netFiring = false;
 	// Update bots behaviour variables at the start
 	if (IsAlive())
 	{
@@ -417,7 +433,13 @@ void Bot::ProcessAI()
 		m_currentState->Update(this);
 		//m_behaviour->update(this);
 		//m_Acceleration += m_behaviour->FollowPath();
-		m_behaviour->Update();
+		if(Network::GetInstance()->m_isHost)
+			m_behaviour->Update();
+
+		// Send is firing here
+		DynamicObjects::GetInstance()->m_data.m_team[0].m_shootData[m_iOwnBotNumber].m_isFiring
+			= m_bFiring;
+		//	= m_bFiring;
 
 	}
 	else
@@ -446,9 +468,9 @@ void Bot::ProcessAI()
 		m_msHighestUpdateTime = t_msUpdateTime.count();
 
 	m_msUpdateTime = t_msUpdateTime.count();
-	///////////////////////////////////////////
 
 
+	// Debug info
 	// DEBUG DRAWING :: COMMENT OUT WHERE NECASARY
 	if (m_DrawPath == true)
 	{
@@ -458,6 +480,7 @@ void Bot::ProcessAI()
 	{
 		DrawStats();
 	}
+	///////////////////////////////////////////
 
 }
 
@@ -484,11 +507,12 @@ void Bot::DrawStats()
 {
 	Renderer* pTheRenderer = Renderer::GetInstance();
 
-		// LEFT SIDE~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-		// 20 spacing per line
-		// SAY WHAT BOT
-		pTheRenderer->DrawTextAt(Vector2D(10.0f, 60.0f + (m_iOwnBotNumber * 100)), L"Bot:");
-		pTheRenderer->DrawNumberAt(Vector2D(100.0f, 60.0f + (m_iOwnBotNumber * 100)), m_iOwnBotNumber);
+
+	// LEFT SIDE~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+	// 20 spacing per line
+	// SAY WHAT BOT
+	pTheRenderer->DrawTextAt(Vector2D(10.0f, 60.0f + (m_iOwnBotNumber * 100)), L"Bot:");
+	pTheRenderer->DrawNumberAt(Vector2D(100.0f, 60.0f + (m_iOwnBotNumber * 100)), m_iOwnBotNumber);
 	// Check if alive
 	if (IsAlive())
 	{
@@ -502,6 +526,7 @@ void Bot::DrawStats()
 		// STATE DATA
 		pTheRenderer->DrawTextAt(Vector2D(10.0f, 120.0f + (m_iOwnBotNumber * 100)), L"State:");
 		pTheRenderer->DrawTextAt(Vector2D(100.0f, 120.0f + (m_iOwnBotNumber * 100)), m_currentState->GetName());
+		
 	}
 	else
 	{
@@ -515,11 +540,36 @@ void Bot::DrawStats()
 	// RIGHT SIDE~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 	if (IsAlive())
 	{
-		pTheRenderer->DrawTextAt(Vector2D(1500.0f, 80.0f + (m_iOwnBotNumber * 100)), L"       FRAMETIME:");
+		pTheRenderer->DrawTextAt(Vector2D(1500.0f, 80.0f + (m_iOwnBotNumber * 100)), L"       Update Time:");
 		pTheRenderer->DrawNumberAt(Vector2D(1750.0f, 80.0f + (m_iOwnBotNumber * 100)), m_msUpdateTime);
-		pTheRenderer->DrawTextAt(Vector2D(1500.0f, 100.0f + (m_iOwnBotNumber * 100)), L"HIGHESTFRAMETIME:");
+		pTheRenderer->DrawTextAt(Vector2D(1500.0f, 100.0f + (m_iOwnBotNumber * 100)), L"Highest Update Time:");
 		pTheRenderer->DrawNumberAt(Vector2D(1750.0f, 100.0f + (m_iOwnBotNumber * 100)), m_msHighestUpdateTime);
+	}
+}
 
+void Bot::ClientDrawStats()
+{
+	Renderer* pTheRenderer = Renderer::GetInstance();
+	// LEFT SIDE~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+	// 20 spacing per line
+	// SAY WHAT BOT
+	pTheRenderer->DrawTextAt(Vector2D(10.0f, 60.0f + (m_iOwnBotNumber * 100)), L"Bot:");
+	pTheRenderer->DrawNumberAt(Vector2D(100.0f, 60.0f + (m_iOwnBotNumber * 100)), m_iOwnBotNumber);
+	// Check if alive
+	if (IsAlive())
+	{
+		// POSITION DATA
+		pTheRenderer->DrawTextAt(Vector2D(10.0f, 80.0f + (m_iOwnBotNumber * 100)), L"Position:");
+		pTheRenderer->DrawNumberAt(Vector2D(100.0f, 80.0f + (m_iOwnBotNumber * 100)), (int)m_Position.XValue);
+		pTheRenderer->DrawNumberAt(Vector2D(160.0f, 80.0f + (m_iOwnBotNumber * 100)), (int)m_Position.YValue);
+		// AMMO DATA
+		pTheRenderer->DrawTextAt(Vector2D(10.0f, 100.0f + (m_iOwnBotNumber * 100)), L"Ammo:");
+		pTheRenderer->DrawNumberAt(Vector2D(100.0f, 100.0f + (m_iOwnBotNumber * 100)), m_iAmmo);
+	}
+	else
+	{
+		// SAY IS DEAD
+		pTheRenderer->DrawTextAt(Vector2D(10.0f, 80.0f + (m_iOwnBotNumber * 100)), L"BOT DEAD!!!");
 	}
 }
 
@@ -552,6 +602,8 @@ void Bot::SetShootData(int _team, int _bot, int _damage, bool _isShooting)
 	m_iAimingAtBot = _bot;
 	m_iShootDamage = _damage;
 	m_bFiring = _isShooting;
+
+	
 	
 }
 
