@@ -1,6 +1,6 @@
 #pragma once
 
-#define USE_THREADS false
+#define USE_THREADS true
 
 #include <stack>
 #include <thread>

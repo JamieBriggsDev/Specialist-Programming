@@ -2,15 +2,37 @@
 Windows IP Configuration
 
 
-Ethernet adapter Local Area Connection 2:
-
-   Connection-specific DNS Suffix  . : HAL.local
-   Link-local IPv6 Address . . . . . : fe80::dc49:fb23:af67:6318%12
-   IPv4 Address. . . . . . . . . . . : 172.16.1.38
-   Subnet Mask . . . . . . . . . . . : 255.255.255.0
-   Default Gateway . . . . . . . . . : 172.16.1.1
-
-Tunnel adapter isatap.HAL.local:
+Ethernet adapter Ethernet:
 
    Media State . . . . . . . . . . . : Media disconnected
-   Connection-specific DNS Suffix  . : HAL.local
+   Connection-specific DNS Suffix  . : 
+
+Wireless LAN adapter Local Area Connection* 2:
+
+   Media State . . . . . . . . . . . : Media disconnected
+   Connection-specific DNS Suffix  . : 
+
+Wireless LAN adapter WiFi:
+
+   Connection-specific DNS Suffix  . : Home
+   IPv6 Address. . . . . . . . . . . : 2a02:c7f:4c14:3100:79c0:383a:c939:2b95
+   IPv6 Address. . . . . . . . . . . : fda6:350a:28b7:0:79c0:383a:c939:2b95
+   Temporary IPv6 Address. . . . . . : 2a02:c7f:4c14:3100:1d21:2808:eb5f:9c1a
+   Temporary IPv6 Address. . . . . . : fda6:350a:28b7:0:1d21:2808:eb5f:9c1a
+   Link-local IPv6 Address . . . . . : fe80::79c0:383a:c939:2b95%6
+   IPv4 Address. . . . . . . . . . . : 192.168.0.26
+   Subnet Mask . . . . . . . . . . . : 255.255.255.0
+   Default Gateway . . . . . . . . . : fe80::7250:afff:fe44:21d9%6
+                                       192.168.0.1
+
+Ethernet adapter Bluetooth Network Connection:
+
+   Media State . . . . . . . . . . . : Media disconnected
+   Connection-specific DNS Suffix  . : 
+
+Tunnel adapter Local Area Connection* 14:
+
+   Connection-specific DNS Suffix  . : 
+   IPv6 Address. . . . . . . . . . . : 2001:0:4137:9e76:10a5:162f:a13e:d571
+   Link-local IPv6 Address . . . . . : fe80::10a5:162f:a13e:d571%8
+   Default Gateway . . . . . . . . . : 

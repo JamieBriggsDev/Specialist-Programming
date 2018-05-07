@@ -464,6 +464,20 @@ void Bot::ProcessAI()
 
 	std::chrono::duration<double> t_msUpdateTime = t_finish - t_start;
 
+	// Add update time to recorded data untill 100 had been hit
+	if (m_updateCycle < 100 && IsAlive())
+	{
+		m_recordedValue.push_back(t_msUpdateTime.count());
+		m_updateCycle++;
+	}
+	//else if (m_updateCycle == 100)
+	//{
+		//string FileName = "Test1STBot" + std::to_string(m_iOwnBotNumber);
+		//WriteUpdateTimeToFile(FileName);
+		//m_updateCycle++;
+
+	//}
+
 	if(t_msUpdateTime.count() > m_msHighestUpdateTime)
 		m_msHighestUpdateTime = t_msUpdateTime.count();
 
@@ -606,6 +620,11 @@ void Bot::SetShootData(int _team, int _bot, int _damage, bool _isShooting)
 	
 	
 }
+
+//void Bot::WriteUpdateTimeToFile(string _name)
+//{
+//
+//}
 
 void Bot::ProcessAIBadly()
 {

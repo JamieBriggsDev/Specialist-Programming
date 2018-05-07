@@ -1,4 +1,5 @@
 #pragma once
+#include <string>
 #include "errortype.h"
 #include "gametimer.h"
 #define NULL 0
@@ -12,6 +13,8 @@ private:
 	enum GameState{MAIN, RUNNING, PAUSED, MINIMISED};
 	GameState m_State;
 	GameTimer m_timer;
+	int m_writeToFileCounter = 0;
+	void WriteTestAToFile(std::string _name);
 public:
 	static Game* GetInstance();		// Thread-safe singleton
 	static void Release();

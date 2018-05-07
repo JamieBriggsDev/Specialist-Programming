@@ -1,4 +1,6 @@
 #include <time.h>
+#include <fstream>
+#include <iostream>
 
 #include "game.h"
 #include "staticmap.h"
@@ -54,6 +56,31 @@ ErrorType Game::Start()
 	m_State = MAIN;
 
 	return SUCCESS;
+}
+
+void Game::WriteTestAToFile(std::string _name)
+{
+	std::ofstream newTestFile;
+	newTestFile.open("TestA\\" + _name + ".csv");
+	newTestFile << _name + "\n";
+	newTestFile << "Time\n";
+	int counter = 0;
+	for (int i = 0; i < NUMBOTSPERTEAM; i++)
+	{
+		newTestFile << "Bot " + std::to_string(counter) + ",";
+		counter++;
+	}
+	newTestFile << "\n";
+
+	for (int i = 0; i < DynamicObjects::GetInstance()->GetBot(0, i).m_recordedValue.size(); i++)
+	{
+		for (int j = 0; j < NUMBOTSPERTEAM; j++)
+		{
+			newTestFile << std::to_string(DynamicObjects::GetInstance()->GetBot(0, j).m_recordedValue[i]) + ",";
+		}
+		newTestFile << "\n";
+	}
+	newTestFile.close();
 }
 
 ErrorType Game::RunInterface()
@@ -251,6 +278,13 @@ ErrorType Game::Update()
 		// Update after networking
 		DynamicObjects::GetInstance()->Update(m_timer.m_fFrameTime);
 
+		// Count after update function
+		m_writeToFileCounter++;
+		if (m_writeToFileCounter > 120)
+		{
+			WriteTestAToFile("TestA_MT_10");
+		}
+
 		// DEBUG
 		if (MyInputs::GetInstance()->KeyPressed(DIK_NUMPAD0))
 		{
@@ -285,6 +319,7 @@ ErrorType Game::Update()
 	//	//pTheRenderer->DrawTextAt(Vector2D(1000.0f, 200.0f), Network::GetInstance()->m_MyIP);
 	//	//Network::GetInstance()->m_MyIP = Network::G
 
+	// Slightly more just in case
 
 
 	//}

@@ -1,4 +1,8 @@
 #pragma once
+#include <fstream>
+#include <vector>
+#include <string>
+
 #include "State.h"
 #include "behaviour.h"
 #include "shapes.h"
@@ -192,4 +196,9 @@ public:
 	bool GetIsFiring() { return m_netFiring; }
 	bool GetIsAiming() { return m_bAiming; }
 	float GetTimeToCoolDown() { return m_dTimeToCoolDown; }
+
+
+	// Testing update times and writing to file
+	std::vector<double> m_recordedValue;
+	int m_updateCycle = 0;
 };
