@@ -292,7 +292,7 @@ bool Network::Recieve()
 
 	int l_addresLength = sizeof(m_serverAddress);
 	int recvLen = 0;
-	recvfrom(m_socket, l_buffer, sizeof(SendData), 0,
+	int l_error = recvfrom(m_socket, l_buffer, sizeof(SendData), 0,
 		(struct sockaddr*) &m_serverAddress, &l_addresLength);
 
 	char exit[] = "exit";
@@ -302,22 +302,9 @@ bool Network::Recieve()
 		return false;
 	}
 
-	memcpy(&m_data, &l_buffer, sizeof(SendData));
-
-	// Team Score
-	//cout << "Team 0 Score: " << m_data.m_team[0].m_teamScore << endl;
-	//cout << "Team 1 Score: " << m_data.m_team[1].m_teamScore << endl;
-	for (int i = 0; i < NUMTEAMS; i++)
-	{
-		for (int j = 0; j < NUMBOTSPERTEAM; j++)
-		{
-			// Position data
-			//cout << "Team " << i << " Bot " << j << "Position = (";
-			//cout << m_data.m_team[i].m_bots[j].m_posX << ", " <<
-				//m_data.m_team[i].m_bots[j].m_posY << ")\n";
-		}
-	}
-	//system("cls");
+	// Dont overwrite if data didnt recieve this cycle.
+	if(l_error != -1)
+		memcpy(&m_data, &l_buffer, sizeof(SendData));
 }
 
 
