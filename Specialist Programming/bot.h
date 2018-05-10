@@ -11,8 +11,6 @@
 class behaviour;
 class botController;
 
-enum States { HUNT , TOTAL_STATES};
-
 class Bot
 {
 	// STATES
@@ -20,7 +18,7 @@ class Bot
 	friend class Capture;
 	friend class Attack;
 	friend class Reload;
-
+	friend class Defend;
 	friend class behaviour;
 protected:
 

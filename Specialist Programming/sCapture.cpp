@@ -1,5 +1,6 @@
 #include "sCapture.h"
 #include "sAttack.h"
+#include "sDefend.h"
 #include "dynamicObjects.h"
 
 // static instance
@@ -24,13 +25,14 @@ void Capture::Enter(Bot * pBot)
 void Capture::Update(Bot* pBot)
 { 
 	CheckDistance(pBot);
-	CheckForEnemy(pBot);
+	CheckForEnemies(pBot);
+
 	CheckDPOwner(pBot);
 
 	pBot->SetAcceleration(pBot->m_behaviour->AccumilateBehaviours(pBot->GetLocation(), pBot->GetVelocity(), 
 		DynamicObjects::GetInstance()->GetDominationPoint(pBot->m_behaviour->GetDominationID()).m_Location, Vector2D(0, 0)));
 
-} // Execute()
+} // ()
 
 void Capture::Exit(Bot * pBot)
 {
@@ -51,20 +53,36 @@ void Capture::SetTarget(Bot * pBot)
 void Capture::CheckDistance(Bot* pBot)
 { 
 
+	//// Clears the path if target is in sight
+	//if (StaticMap::GetInstance()->IsLineOfSight(pBot->GetLocation(),
+	//	DynamicObjects::GetInstance()->GetDominationPoint(pBot->m_behaviour->GetDominationID()).m_Location))
+	//{
+	//	pBot->m_behaviour->SetBehaviours(1, 0, 0, 0, 0, 1);
+	//	// Clear path
+	//	while(!pBot->m_behaviour->GetPath()->empty())
+	//		pBot->m_behaviour->GetPath()->pop();
+	//}
+
 	// Clears the path if target is in sight
 	if (StaticMap::GetInstance()->IsLineOfSight(pBot->GetLocation(),
 		DynamicObjects::GetInstance()->GetDominationPoint(pBot->m_behaviour->GetDominationID()).m_Location))
 	{
-		pBot->m_behaviour->SetBehaviours(1, 0, 0, 0, 0, 1);
+		if (((pBot->GetLocation() -
+			DynamicObjects::GetInstance()->GetDominationPoint(pBot->m_behaviour->GetDominationID()).m_Location)).magnitude() < 100)
+			pBot->m_behaviour->SetBehaviours(0, 1, 0, 0, 0, 1);
+		else
+			pBot->m_behaviour->SetBehaviours(1, 0, 0, 0, 0, 1);
+
+
 		// Clear path
-		while(!pBot->m_behaviour->GetPath()->empty())
+		while (!pBot->m_behaviour->GetPath()->empty())
 			pBot->m_behaviour->GetPath()->pop();
 	}
 
 } 
 
 
-void Capture::CheckForEnemy(Bot* pBot)
+void Capture::CheckForEnemies(Bot* pBot)
 { 
 
 	// Loop through all enemy bots on the next team
@@ -89,7 +107,7 @@ void Capture::CheckDPOwner(Bot* pBot)
 	if (DynamicObjects::GetInstance()->GetDominationPoint(pBot->m_behaviour->GetDominationID())
 		.m_OwnerTeamNumber == pBot->GetTeamID())
 	{
-		//pBot->ChangeState(Defend::GetInstance());
+		pBot->ChangeState(Defend::GetInstance());
 	}
 
 } 

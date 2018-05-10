@@ -99,6 +99,9 @@
     <ClInclude Include="Network.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="sDefend.h">
+      <Filter>States</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="bot.cpp">
@@ -172,6 +175,9 @@
     </ClCompile>
     <ClCompile Include="Network.cpp">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="sDefend.cpp">
+      <Filter>States</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

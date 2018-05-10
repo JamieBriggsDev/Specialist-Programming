@@ -59,7 +59,7 @@ void Reload::CheckDistance(Bot* pBot)
 
 	if ((pBot->GetLocation() - pBot->m_behaviour->m_currentPathTarget).magnitude() < 0.5f)
 	{
-		pBot->m_behaviour->SetBehaviours(0, 0, 0, 0, 0, 0, 1);
+		pBot->m_behaviour->SetBehaviours(0, 0, 0, 0, 0, 0);
 		if(pBot->GetAmmo())
 		{
 			pBot->ChangeState(Capture::GetInstance());

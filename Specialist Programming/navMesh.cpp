@@ -361,15 +361,11 @@ std::stack<Vector2D> Graph::PathFind(const Vector2D _from, const Vector2D _to, c
 	}// while loop
 
 	 // if fails, return l_path with one position = 0.0f, 0.0f
-	if (!m_path[_bot].empty())
-	{
-		return m_path[_bot];
-	}
-	else
-	{
-		//m_path[_bot].push(Vector2D(0.0f, 0.0f));
-		return m_path[_bot];
-	}
+
+	m_path[_bot].push(_to);
+	return m_path[_bot];
+
+	
 }
 
 void Graph::StartThreadedPathFind(const Vector2D _from, const Vector2D _to, const int _bot, std::thread * _thread)

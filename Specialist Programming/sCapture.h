@@ -41,7 +41,7 @@ public:
 	void CheckDistance(Bot* pBot);
 
 	// Checks if an enemy is close
-	void CheckForEnemy(Bot* pBot);
+	void CheckForEnemies(Bot* pBot);
 
 	// Check who owns domination point
 	void CheckDPOwner(Bot* pBot);

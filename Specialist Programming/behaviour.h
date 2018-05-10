@@ -42,11 +42,11 @@ private:
 	bool m_isAttemptingShotAtTarget = false;
 
 
+public:
 	// IDs to bot and target
 	int m_ownerID;
 	int m_botTarget;
 	int m_dominationTarget;
-public:
 	// Owner and target bot
 	class Bot* m_owner;
 	class Bot* m_botToShoot;

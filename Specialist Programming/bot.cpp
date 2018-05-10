@@ -367,6 +367,7 @@ void Bot::TakeDamage(int amount)
 	if(m_iHealth<=0 && m_dTimeToRespawn<=0)
 	{
 		m_dTimeToRespawn = RESPAWNTIME;
+		ChangeState(Capture::GetInstance());
 	}
 
 	// Being shot at puts you off your aim. 

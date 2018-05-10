@@ -168,6 +168,7 @@
     <ClInclude Include="rules.h" />
     <ClInclude Include="sAttack.h" />
     <ClInclude Include="sCapture.h" />
+    <ClInclude Include="sDefend.h" />
     <ClInclude Include="Shapes.h" />
     <ClInclude Include="SoundPlayer.h" />
     <ClInclude Include="sReload.h" />
@@ -194,6 +195,7 @@
     <ClCompile Include="renderer.cpp" />
     <ClCompile Include="sAttack.cpp" />
     <ClCompile Include="sCapture.cpp" />
+    <ClCompile Include="sDefend.cpp" />
     <ClCompile Include="Shapes.cpp" />
     <ClCompile Include="sReload.cpp" />
     <ClCompile Include="State.cpp" />
