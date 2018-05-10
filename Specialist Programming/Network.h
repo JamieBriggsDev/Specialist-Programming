@@ -13,7 +13,7 @@ class DynamicObjects;
 //#include "game.h"
 
 #define PORT (8645)
- #define IP ("172.16.1.37")
+ #define IP ("172.16.1.36")
 //#define IP ("172.16.1.35")
 
 
@@ -97,17 +97,8 @@ public:
 		return m_pInst;
 	}
 	// Delete
-	static void Release()
-	{
-		if (m_pInst)
-		{
-			// Close all connections before delete
-			m_pInst->CloseConnection();
-			// Delete and set to nullptr
-			delete m_pInst;
-			m_pInst = nullptr;
-		}
-	}
+	static void Release();
+
 	//NetData m_frameData;
 	// Data to be sent
 	SendData m_data;
@@ -137,6 +128,8 @@ public:
 	void Send(SendData _data);
 
 	// CLIENT STUFF
+	// Leaves the host
+	void ExitHost();
 	// Connects to a server
 	bool ConnectToServer();
 	// Collect any data sent from the host

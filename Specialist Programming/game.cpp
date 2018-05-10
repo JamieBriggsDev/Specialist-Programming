@@ -45,6 +45,10 @@ Game::Game()
 
 Game::~Game()
 {
+	if (!Network::GetInstance()->m_isHost)
+	{
+		Network::GetInstance()->ExitHost();
+	}
 	
 }
 
@@ -159,15 +163,15 @@ ErrorType Game::Update()
 	if (m_State == MAIN)
 	{
 
-		pTheRenderer->DrawTextAt(Vector2D(250.0f, 400.0f), L"1: Host");
+		pTheRenderer->DrawTextAt(Vector2D(100.0f, 400.0f), L"1: Host");
 
-		pTheRenderer->DrawTextAt(Vector2D(250.0f, 450.0f), L"2: Connect To ");
+		pTheRenderer->DrawTextAt(Vector2D(100.0f, 450.0f), L"2: Connect To ");
 
 		const size_t ipSize = strlen(Network::GetInstance()->m_hostIP) + 1;
 		wchar_t *ip = new wchar_t[ipSize];
 		mbstowcs(ip, Network::GetInstance()->m_hostIP, ipSize);
 
-		pTheRenderer->DrawTextAt(Vector2D(450.0f, 450.0f), ip);
+		pTheRenderer->DrawTextAt(Vector2D(250.0f, 450.0f), ip);
 
 
 		MyInputs* l_Input = MyInputs::GetInstance();
@@ -279,11 +283,11 @@ ErrorType Game::Update()
 		DynamicObjects::GetInstance()->Update(m_timer.m_fFrameTime);
 
 		// Count after update function
-		m_writeToFileCounter++;
-		if (m_writeToFileCounter > 120)
-		{
-			WriteTestAToFile("TestA_MT_10");
-		}
+		//m_writeToFileCounter++;
+		//if (m_writeToFileCounter > 120)
+		//{
+		//	WriteTestAToFile("TestA_MT_10");
+		//}
 
 		// DEBUG
 		if (MyInputs::GetInstance()->KeyPressed(DIK_NUMPAD0))

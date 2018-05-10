@@ -91,7 +91,7 @@ void Defend::CheckForEnemies(Bot * pBot)
 			DynamicObjects::GetInstance()->GetBot(1, i).GetLocation()))
 		{
 			if ((pBot->GetLocation() - DynamicObjects::GetInstance()->GetBot(1, i).
-				GetLocation()).magnitude() < 600 && DynamicObjects::GetInstance()->GetBot(1, i).IsAlive())
+				GetLocation()).magnitude() < 400 && DynamicObjects::GetInstance()->GetBot(1, i).IsAlive())
 			{
 				pBot->ChangeState(Attack::GetInstance());
 			}

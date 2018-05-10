@@ -97,6 +97,29 @@ void Network::ExitClents()
 
 }
 
+void Network::ExitHost()
+{
+	char l_exit[5] = "exit";
+	//int l_addressLength = sizeof(m_serverAddress);
+
+	int check = sendto(m_socket, l_exit, sizeof(l_exit), 0,
+		(struct sockaddr*) &m_serverAddress, sizeof(m_serverAddress));
+	for (int i = 0; i < 1000; i++)
+	{
+		for (int i = 0; i < 500; i++)
+		{
+			check = sendto(m_socket, l_exit, sizeof(l_exit), 0,
+				(struct sockaddr*) &m_serverAddress, sizeof(m_serverAddress));
+			if (check >= 0)
+				break;
+		}
+
+	}
+
+	check = check;
+
+}
+
 bool Network::WSASetup()
 {
 	bool l_error = true;
@@ -108,6 +131,18 @@ bool Network::WSASetup()
 	}
 
 	return l_error;
+}
+
+void Network::Release()
+{
+	if (m_pInst)
+	{
+		// Close all connections before delete
+		m_pInst->CloseConnection();
+		// Delete and set to nullptr
+		delete m_pInst;
+		m_pInst = nullptr;
+	}
 }
 
 bool Network::SetupServer()
@@ -195,94 +230,37 @@ void Network::SaveClents(sockaddr_in _address)
 void Network::Send(SendData _data)
 {
 	// Check for any exit code
+	char l_buffer[sizeof(SendData)];
+	memset(&l_buffer, 0, sizeof(SendData));
+	memset(&m_data, 0, sizeof(SendData));
 
+	int l_addresLength = sizeof(m_serverAddress);
+	int recvLen = 0;
+
+	for (int i = 0; i < m_clients.size(); i++)
+	{
+		int l_error = recvfrom(m_socket, l_buffer, sizeof(SendData), 0,
+			(struct sockaddr*) &m_clients[i], &l_addresLength);
+
+		char exit[] = "exit";
+		if (l_error == 5)
+		{
+			//cout << "Exiting" << endl;
+			m_clients.erase(m_clients.begin() + i);
+		}
+
+	}
 
 	// Send data to all clients
 	m_data = _data;
-	for (unsigned int i = 0; i < m_clients.size(); i++)
+	for (int i = 0; i < m_clients.size(); i++)
 	{
 
-		if (sendto(m_socket, (char*)&m_data, sizeof(SendData), 0, (struct sockaddr*) &m_clients[i], sizeof(m_clients[i])) 
-			== SOCKET_ERROR)
-		{
-		}
-		/*ErrorLogger::Writeln(L"Error: sendto() - Send() - Wrong size - Exiting");*/
+		sendto(m_socket, (char*)&m_data, sizeof(SendData), 0, (struct sockaddr*) &m_clients[i], sizeof(m_clients[i]));
 	}
 
 }
 
-
-//bool Network::ConnectToServer()
-//{ // Initialises the client and attempts to connect to server asking to
-//  // retrieve the initial data the server would send
-//
-//	WSASetup();
-//
-//	// Create socket
-//	if ((m_socket = socket(PF_INET, SOCK_DGRAM, IPPROTO_UDP)) < 0)
-//	{
-//		cout << "Error with socket function connect!" << endl;
-//		m_isHost = true;
-//		return false;
-//	}
-//
-//	memset(&m_serverAddress, 0, sizeof(m_serverAddress));     // 0 structure
-//	m_serverAddress.sin_family = AF_INET;                   // Internet address
-//	m_serverAddress.sin_addr.s_addr = inet_addr(IP);        // Server IP
-//	m_serverAddress.sin_port = htons(PORT);                 // Local port
-//
-//														  //ioctlsocket(sock, FIONBIO, &nonblocking);
-//
-//														  // Create the connect message and send to the server, checking for error
-//	char connectStr[] = "hi";
-//	if (sendto(m_socket, connectStr, strlen(connectStr), 0, (struct sockaddr*) &m_serverAddress, sizeof(m_serverAddress)) != strlen(connectStr))
-//	{
-//		//ErrorLogger::Writeln(L"Error: sendto() - ConnectToServer() - Exiting");
-//		cout << "Error with sendto() function!" << endl;
-//		m_isHost = true;
-//		return false;
-//	}
-//
-//	// Create variables ready for recieving initial data
-//	int recvlen = 0;
-//	int addrLen = sizeof(m_serverAddress);
-//	char buffer[sizeof(InitData)];
-//	memset(&buffer, 0, sizeof(InitData));
-//
-//	// Recieve the initial data
-//	recvlen = recvfrom(m_socket, buffer, sizeof(InitData), 0,
-//		(struct sockaddr*) &m_serverAddress, &addrLen);
-//
-//	// Create initial data object and init to 0
-//	InitData initData;
-//	if (recvlen != -1)
-//	{
-//		memcpy(&initData, &buffer, sizeof(InitData));
-//
-//		// Set the timer until the next lot of score is set
-//		//DynamicObjects::GetInstance()->SetScoreTimer(initData.scoreUpdateTimer);
-//
-//		// Set the scores for the teams, filthy way of doing it however supports any
-//		// number of teams this way, will change if have time
-//		//for (int i = 0; i < NUMTEAMS; i++)
-//		//	DynamicObjects::GetInstance()->m_rgTeams[i].m_iScore = initData.scores[i];
-//
-//		//// Sets the owners of the domination points, one again hacky method but 
-//		//// supports as many domination points as it needs, will change if have time
-//		//for (int i = 0; i < NUMDOMINATIONPOINTS; i++)
-//		//	DynamicObjects::GetInstance()->m_rgDominationPoints[i].m_OwnerTeamNumber = initData.dpStates[i];
-//
-//		m_dataRecieved = initData.m_dataSent;
-//
-//		ioctlsocket(m_socket, FIONBIO, &m_nonBlocking);
-//	}
-//	else
-//	{
-//		return false;
-//	}
-//
-//	return true;
-//} // ConnectToServer()
 
 bool Network::Recieve()
 {
@@ -290,10 +268,10 @@ bool Network::Recieve()
 	memset(&l_buffer, 0, sizeof(SendData));
 	memset(&m_data, 0, sizeof(SendData));
 
-	int l_addresLength = sizeof(m_serverAddress);
+	int l_addressLength = sizeof(m_serverAddress);
 	int recvLen = 0;
 	int l_error = recvfrom(m_socket, l_buffer, sizeof(SendData), 0,
-		(struct sockaddr*) &m_serverAddress, &l_addresLength);
+		(struct sockaddr*) &m_serverAddress, &l_addressLength);
 
 	char exit[] = "exit";
 	if (strcmp(l_buffer, exit) == 0)
@@ -368,15 +346,17 @@ bool Network::ConnectToServer()
 		m_dataRecieved = l_initData.m_dataSent;
 
 
-		ioctlsocket(m_socket, FIONBIO, &m_nonBlocking);
+
 
 		//cout << "Receive Data failed\n";
 	}
-	else
-	{
-		l_error = false;
-		//return l_error;
-	}
+	//else
+	//{
+	//	l_error = false;
+	//	//return l_error;
+	//}
+
+	ioctlsocket(m_socket, FIONBIO, &m_nonBlocking);
 
 	return l_error;
 }
